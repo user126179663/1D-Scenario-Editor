@@ -1,0 +1,58 @@
+:host(scenarios-node) {
+	
+	height: 100%;
+	width: 100%;
+	writing-mode: vertical-rl;
+	
+}
+
+#root {
+	
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
+	padding: 3rem;
+	width: 100%;
+	
+}
+
+#meta {
+	
+	flex: 0 1 20%;
+	position: relative;
+	
+}
+#meta > * {
+	
+	position: absolute;
+	right: 0;
+	top: 0;
+	
+}
+#author {
+	
+	right: 2rem;
+	
+}
+#meta img-loader {
+	
+	display: block;
+	height: 100%;
+	width: 100%;
+	
+}
+#meta :not(img-loader) {
+	
+	z-index: 1;
+	
+}
+#scenarios {
+	
+	flex: 0 1;
+	
+}
+#ctrl {
+	
+	flex: 0 1 auto;
+	
+}

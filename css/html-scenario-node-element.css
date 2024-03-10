@@ -1,0 +1,11 @@
+#branch {
+	
+	display: flex;
+	
+}
+
+#branch > * {
+	
+	flex: 1 0 calc(100% / 3);
+	
+}

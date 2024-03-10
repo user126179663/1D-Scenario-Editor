@@ -1,0 +1,40 @@
+:host(scenarios-loader) {
+	
+	display: block;
+	height: 100%;
+	width: 100%;
+	
+}
+
+#root {
+	
+	height: 100%;
+	position: relative;
+	writing-mode: vertical-rl;
+	width: 100%;
+	
+}
+
+header {
+	
+	position: sticky;
+	right: 0;
+	top: 0;
+	
+}
+
+#container {
+	
+	align-items: center;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	
+}
+
+#container > * {
+	
+	display: block;
+	width: 100%;
+	
+}

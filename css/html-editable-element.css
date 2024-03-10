@@ -1,0 +1,67 @@
+*, ::slotted(*) {
+	margin: 0;
+	padding: 0;
+}
+
+#root {
+	
+	position: relative;
+	
+}
+
+#editor::slotted(*) {
+	
+	appearance: none;
+	border: none;
+	outline: none;
+	width: 100%;
+	
+}
+#editor::slotted(*) {
+	
+	height: 100px;
+	
+}
+
+#editor::slotted(input[readonly]), #editor::slotted(textarea[readonly]) {
+	
+	cursor: default;
+	resize: none;
+	
+}
+
+#ctrl {
+	
+	display: none;
+	margin: .2rem .5rem;
+	position: absolute;
+	right: 0;
+	top: 0;
+	
+}
+:host(editable-element:hover) #ctrl {
+	
+	display: block;
+	
+}
+#ctrl * {
+	
+	font: normal normal normal 1.5rem/1 sans-serif;
+	
+}
+#editor:hover ~ #ctrl, #ctrl:hover {
+	
+	display: block;
+	
+}
+
+label[for="switch"]::before {
+	
+	content: "✍";
+	
+}
+#switch:checked ~ #ctrl label[for="switch"]::before {
+	
+	content: "✔";
+	
+}

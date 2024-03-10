@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ja">
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" href="css/default.css">
+		<script src="js/utils.js"></script>
+		<script type="module" src="js/load.js"></script>
+	</head>
+	<body>
+		
+		<docs-man></docs-man>
+		
+		<template id="docs-man">
+			
+			<link rel="stylesheet" href="css/html-docs-manager-element.css">
+			
+			<section id="root">
+				
+				<header>
+					<div id="doc-selector-node">
+						<button id="create" type="button">新規作成</button>
+						<button id="doc-selector-button" type="button">開く</button>
+						<button id="doc-delete-button" type="button">削除</button>
+						<select id="doc-selector"></select>
+					</div>
+					<div id="doc-name-node">
+						<button id="doc-save" type="button">保存</button>
+						<button id="doc-close" type="button">閉じる</button>
+						<label for="doc-name">文書名</label>
+						<input id="doc-name" value="sample"></input>
+					</div>
+				</header>
+				
+				<div id="notification"></div>
+				
+				<section id="container"></section>
+				
+			</section>
+			
+		</template>
+		
+		<template id="doc-man">
+			
+			<link rel="stylesheet" href="css/html-doc-manager-element.css">
+			
+			<section id="root">
+				
+				<div id="notification"></div>
+				
+				<header>
+					<div id="meta">
+						<input id="uid" type="hidden">
+						<input id="created-time" type="hidden">
+						<input id="updated-time" type="hidden">
+					</div>
+					<div id="ctrl">
+						<button id="save" type="button">保存</button>
+						<button id="close" type="button">閉じる</button>
+						<label for="name">文書名</label>
+						<input id="name" value="sample">
+					</div>
+				</header>
+				
+				<section id="container"></section>
+				
+			</section>
+			
+		</template>
+		
+		<template id="scenarios-node">
+			
+			<link rel="stylesheet" href="css/html-scenarios-node-element.css">
+			
+			<section id="root">
+				
+				<header id="meta">
+					<editable-element id="title">
+						<span slot="label">題名</span>
+						<input slot="editor">
+					</editable-element>
+					<editable-element id="author">
+						<span slot="label">作者</span>
+						<div slot="editor"></div>
+					</editable-element>
+					<img-loader>
+						<!--<fetch-img slot="image" scale="1" x=".5" y=".5" px=".5" py=".5"></fetch-img>-->
+						<img-measure slot="image" style="--scale: 1; --x: .5; --y: .5; --px: .5; --py: .5;"></img-measure>
+					</img-loader>
+				</header>
+				
+				<section id="scenarios"></section>
+				
+				<section id="ctrl">
+					<button id="add" type="button">📝</button>
+				</section>
+				
+			</section>
+			
+		</template>
+		
+		<template id="img-loader">
+			
+			<link rel="stylesheet" href="css/html-img-loader-element.css">
+			
+			<input id="switcher" type="checkbox" hidden>
+			
+			<section id="root">
+				
+				<resize-observer id="frame" class="body"><slot id="image-slot" name="image"></slot></resize-observer>
+				
+				<section id="ctrl">
+					<label for="switcher"></label>
+					<input id="url">
+					<input id="file" type="file">
+				</section>
+				
+			</section>
+			
+		</template>
+		
+		<template id="node-element">
+			
+			<link rel="stylesheet" href="css/html-node-element.css">
+			
+			<div id="root">
+				
+				<header id="header">
+					<div id="title"></div>
+					<div id="ctrl">
+						<button id="delete" type="button">❌</button>
+					</div>
+				</header>
+				
+				<section id="body"><slot name="node"></slot></section>
+				
+				<footer id="footer"></footer>
+				
+			</div>
+			
+		</template>
+		
+		<template id="scenario-node">
+			
+			<link rel="stylesheet" href="css/html-scenario-node-element.css">
+			
+			<section>
+				<div id="begin">
+					<scenario-controller>
+						<span slot="title">開始</span>
+					</scenario-controller>
+				</div>
+				<div id="branch">
+					<scenario-controller>
+						<span slot="title">選択肢１</span>
+						<input id="selection-text" slot="sub-text">
+					</scenario-controller>
+					<scenario-controller>
+						<span slot="title">選択肢２</span>
+						<input id="selection-text" slot="sub-text">
+					</scenario-controller>
+					<scenario-controller>
+						<span slot="title">選択肢３</span>
+						<input id="selection-text" slot="sub-text">
+					</scenario-controller>
+				</div>
+				<div id="end">
+					<scenario-controller>
+						<span slot="title">終了</span>
+					</scenario-controller>
+				</div>
+			</section>
+			
+		</template>
+		
+		<template id="scenario-controller">
+			
+			<link rel="stylesheet" href="css/html-scenario-contoller-element.css">
+			
+			<section id="root">
+				
+				<header>
+					<div id="title"><slot name="title"></slot></div>
+				</header>
+				
+				<editable-element id="sub-text">
+					<slot name="sub-text" slot="editor"></slot>
+				</editable-element>
+				
+				<scenario-editor id="editor">
+					<textarea id="edit" slot="editor"></textarea>
+				</scenario-editor>
+				
+				<footer></footer>
+				
+			</section>
+			
+		</template>
+		
+		<template id="scenario-editor">
+			
+			<link rel="stylesheet" href="css/html-scenario-editor-element.css">
+			
+			<article>
+				<editable-element id="editor">
+					<slot slot="label" name="label"></slot>
+					<slot slot="editor" name="editor"></slot>
+				</editable-element>
+			</article>
+			
+		</template>
+		
+		<template id="editable-element">
+			
+			<link rel="stylesheet" href="css/html-editable-element.css">
+			
+			<div id="root">
+				
+				<input id="switch" type="checkbox" hidden>
+				
+				<div id="ctrl">
+					<div id="switcher">
+						<label for="switch"></label>
+					</div>
+				</div>
+				
+				<div id="edit-node">
+					<label id="editor-label" for="edit"><slot name="label"></slot></label>
+					<slot id="editor" name="editor"></slot>
+				</div>
+				
+			</div>
+			
+		</template>
+		
+	</body>
+</html>

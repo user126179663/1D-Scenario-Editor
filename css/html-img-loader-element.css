@@ -1,0 +1,115 @@
+#root {
+	
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	
+}
+
+.body {
+	
+	background: rgba(255,255,255,1);
+	border-radius: .4vmax;
+	display: block;
+	flex: 1 0;
+	margin-bottom: 1vmax;
+	width: 100%;
+	
+}
+.body[observed-resizing] {
+	
+	contain: strict !important;
+	
+}
+
+.body ::slotted(img-measure) {
+	
+	--bg-bound-width: calc(var(--frame-width) * var(--img-hw) + var(--frame-height) * var(--img-wh));
+	--bg-bound-height: calc(var(--frame-height) * var(--img-hw) + (var(--img-height) * var(--frame-height-raw) / var(--img-height-raw)) * var(--img-wh));
+	--bg-bound-width-raw: calc(var(--frame-width-raw) * var(--img-hw) + var(--frame-height-raw) * var(--img-wh));
+	--bg-bound-height-raw: calc(var(--frame-height-raw) * var(--img-hw) + (var(--img-height-raw) * var(--frame-height-raw) / var(--img-height-raw)) * var(--img-wh));
+	
+	--bg-width-wh: calc(var(--bg-bound-width) * var(--scale));
+	--bg-height-wh: calc((var(--img-height) * var(--bg-bound-width-raw) / var(--img-width-raw)) * var(--scale));
+	
+	--bg-width-hw: calc((var(--img-width) * var(--bg-bound-height-raw) / var(--img-height-raw)) * var(--scale));
+	--bg-height-hw: calc(var(--bg-bound-height) * var(--scale));
+	
+	--bg-width: calc(var(--bg-width-wh) * var(--img-wh) + var(--bg-width-hw) * var(--img-hw));
+	--bg-height: calc(var(--bg-height-wh) * var(--img-wh) + var(--bg-height-hw) * var(--img-hw));
+	
+	--bg-x: calc(var(--frame-width) * var(--x) - var(--bg-width) * var(--px));
+	--bg-y: calc(var(--frame-height) * var(--y) - var(--bg-height) * var(--py));
+	
+	background: var(--bg-x) var(--bg-y)/var(--bg-width) var(--bg-height) no-repeat var(--img-src);
+	display: block;
+	height: var(--frame-height);
+	width: 100%;
+	
+}
+
+/*.body ::slotted(fetch-img) {
+	
+	--bg-bound-width: calc(var(--frame-width) * var(--img-hw) + var(--frame-height) * var(--img-wh));
+	--bg-bound-height: calc(var(--frame-height) * var(--img-hw) + (var(--img-height) * var(--frame-height-raw) / var(--img-height-raw)) * var(--img-wh));
+	--bg-bound-width-raw: calc(var(--frame-width-raw) * var(--img-hw) + var(--frame-height-raw) * var(--img-wh));
+	--bg-bound-height-raw: calc(var(--frame-height-raw) * var(--img-hw) + (var(--img-height-raw) * var(--frame-height-raw) / var(--img-height-raw)) * var(--img-wh));
+	
+	--bg-width-wh: calc(var(--bg-bound-width) * var(--img-scale));
+	--bg-height-wh: calc((var(--img-height) * var(--bg-bound-width-raw) / var(--img-width-raw)) * var(--img-scale));
+	
+	--bg-width-hw: calc((var(--img-width) * var(--bg-bound-height-raw) / var(--img-height-raw)) * var(--img-scale));
+	--bg-height-hw: calc(var(--bg-bound-height) * var(--img-scale));
+	
+	--bg-width: calc(var(--bg-width-wh) * var(--img-wh) + var(--bg-width-hw) * var(--img-hw));
+	--bg-height: calc(var(--bg-height-wh) * var(--img-wh) + var(--bg-height-hw) * var(--img-hw));
+	
+	--bg-x: calc(var(--frame-width) * var(--img-x) - var(--bg-width) * var(--img-px));
+	--bg-y: calc(var(--frame-height) * var(--img-y) - var(--bg-height) * var(--img-py));
+	
+	background: var(--bg-x) var(--bg-y)/var(--bg-width) var(--bg-height) no-repeat var(--img-url);
+	display: block;
+	height: var(--frame-height);
+	width: 100%;
+	
+}*/
+
+#ctrl {
+	flex: 0 1;
+}
+
+#switcher ~ #root #ctrl label[for="switcher"]::before {
+	
+	content: "画像の読み込み先";
+	
+}
+#switcher ~ #root #ctrl label[for="switcher"]::after {
+	
+	content: "📂";
+	
+}
+#switcher:checked ~ #root #ctrl label[for="switcher"]::after {
+	
+	content: "🌐";
+	
+}
+#switcher ~ #root #ctrl #file {
+	
+	display: inline;
+	
+}
+#switcher:checked ~ #root #ctrl #file {
+	
+	display: none;
+	
+}
+#switcher ~ #root #ctrl #url {
+	
+	display: none;
+	
+}
+#switcher:checked ~ #root #ctrl #url {
+	
+	display: inline;
+	
+}
