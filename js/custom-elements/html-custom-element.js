@@ -1,4 +1,20 @@
+/*
+	（不十分）HTMLCustomElement を継承する際に必要な実装:
+		オブジェクト（以下 HTMLMyElement）を定義後、そのオブジェクトで HTMLMyElement.define() を実行する。
+		
+		コンストラクターとは別にプロパティ名 HTMLCustomElement.$init で初期化関数を設定することができる。
+		この初期化関数は、HTMLCustomElement 上ではコンストラクターとこれと言った差はなく、
+		プロトタイプチェーン上の同関数を HTMLCustomElement から子孫方向へ実行する。
+		また、同初期化関数は静的メソッドとして設定する必要がある。
+		HTMLCustomElement を継承する HTMLCustomShadowElement も同一の初期化関数を仕様として持っているが、
+		こちらは属性 template の変更時に常に実行される分、HTMLCustomElement の初期化関数より実用を想定している。
+*/
+
 export class HTMLCustomElement extends HTMLElement {
+	
+	static EMIT_OPTIONS_BUBBLES = 1;
+	static EMIT_OPTIONS_CANCELABLE = 2;
+	static EMIT_OPTIONS_COMPOSED = 4;
 	
 	static tagName = 'custom-element';
 	
@@ -20,6 +36,7 @@ export class HTMLCustomElement extends HTMLElement {
 	static assigningNodeFilter =
 				[ 'localName', 'name', 'namespaceURI', 'nodeName', 'nodeType', 'nodeValue', 'prefix', 'value' ];
 	static recursiveDOMFilter = [ 'children', 'shadowRoot' ];
+	static emitOptions = [ 'bubbles', 'cancelable', 'composed' ];
 	
 	static get observedAttributes() {
 		
@@ -68,22 +85,16 @@ export class HTMLCustomElement extends HTMLElement {
 	// inverts に true を指定すると、この優先順を反転させられる。
 	static assignStatic(target, propertyName, inverts) {
 		
-		const { getPrototypeOf, hasOwn } = Object, sources = [];
-		let i, constructor, source;
+		const	{ assignStaticTest, getStaticProperties } = HTMLCustomElement,
+				props = HTMLCustomElement.getStaticProperties(...arguments, assignStaticTest), length = props.length;
 		
-		i = -1, (constructor = getPrototypeOf(target).constructor) === Function || (target = constructor);
-		do	hasOwn(target, propertyName) &&
-			(source = target[propertyName]) &&
-			typeof source === 'object' &&
-			(sources[++i] = source);
-		while (target = getPrototypeOf(target));
-		
-		if (i !== -1) {
+		if (length) {
 			
 			const { assign } = Object, merged = {};
+			let i;
 			
-			++i, inverts && sources.reverse();
-			while (--i > -1) assign(merged, sources[i]);
+			i = -1;
+			while (++i < length) assign(merged, props[i]);
 			
 			return merged;
 			
@@ -92,6 +103,37 @@ export class HTMLCustomElement extends HTMLElement {
 		return null;
 		
 	}
+	static assignStaticTest(v) {
+		
+		return v && typeof v === 'object';
+		
+	}
+	//static assignStatic(target, propertyName, inverts) {
+	//	
+	//	const { getPrototypeOf, hasOwn } = Object, sources = [];
+	//	let i, constructor, source;
+	//	
+	//	i = -1, (constructor = getPrototypeOf(target).constructor) === Function || (target = constructor);
+	//	do	hasOwn(target, propertyName) &&
+	//		(source = target[propertyName]) &&
+	//		typeof source === 'object' &&
+	//		(sources[++i] = source);
+	//	while (target = getPrototypeOf(target));
+	//	
+	//	if (i !== -1) {
+	//		
+	//		const { assign } = Object, merged = {};
+	//		
+	//		++i, inverts && sources.reverse();
+	//		while (--i > -1) assign(merged, sources[i]);
+	//		
+	//		return merged;
+	//		
+	//	}
+	//	
+	//	return null;
+	//	
+	//}
 	
 	// handlers に指定した object 内の function を、binder に指定した object で束縛し、
 	// すべての束縛した function を boundAt に指定した object のプロパティとする。
@@ -147,33 +189,74 @@ export class HTMLCustomElement extends HTMLElement {
 		
 	}
 	
+	static getStaticProperties(target, propertyName, inverts, test) {
+		
+		const { getPrototypeOf, hasOwn } = Object, props = [], passes = typeof test !== 'function';
+		let i, constructor, prop;
+		
+		i = -1, (constructor = getPrototypeOf(target).constructor) === Function || (target = constructor);
+		do	hasOwn(target, propertyName) &&
+			!(void (prop = target[propertyName])) &&
+			(passes || test(prop, ...arguments)) &&
+			(props[++i] = prop);
+		while (target = getPrototypeOf(target));
+		
+		return inverts ? props.reverse() : props;
+		
+	}
+	
+	static getStaticFunctionsTest(v) {
+		
+		return typeof v === 'function';
+		
+	}
+	
 	// target から辿れるプロトタイプが持つ propertyName に一致するプロパティが Array であれば、
 	// それらの Array 内のすべての要素を target から近い順に新しい配列に Array.prototype.push を通じて追加される。
 	// inverts に true を指定すると、遠い順に追加される。
 	static pushStatic(target, propertyName, inverts) {
 		
-		const { isArray } = Array, { getPrototypeOf, hasOwn } = Object, sources = [];
-		let i, constructor, source;
+		const props = HTMLCustomElement.getStaticProperties(...arguments, Array.isArray), length = props.length;
 		
-		i = -1, (constructor = getPrototypeOf(target).constructor) === Function || (target = constructor);
-		do	hasOwn(target, propertyName) && isArray(source = target[propertyName]) && (sources[++i] = source);
-		while (target = getPrototypeOf(target));
-		
-		if (i !== -1) {
+		if (length) {
 			
-			const { assign } = Object, merged = [];
-			let i0;
+			const merged = [];
+			let i;
 			
-			i0 = -1, ++i, inverts && sources.reverse();
-			while (++i0 < i) merged.push(...sources[i0]);
+			i = -1;
+			while (++i < length) merged.push(...props[i0]);
 			
 			return merged;
 			
 		}
 		
-		return null;
+		return props;
 		
 	}
+	//static pushStatic(target, propertyName, inverts) {
+	//	
+	//	const { isArray } = Array, { getPrototypeOf, hasOwn } = Object, sources = [];
+	//	let i, constructor, source;
+	//	
+	//	i = -1, (constructor = getPrototypeOf(target).constructor) === Function || (target = constructor);
+	//	do	hasOwn(target, propertyName) && isArray(source = target[propertyName]) && (sources[++i] = source);
+	//	while (target = getPrototypeOf(target));
+	//	
+	//	if (i !== -1) {
+	//		
+	//		const { assign } = Object, merged = [];
+	//		let i0;
+	//		
+	//		i0 = -1, ++i, inverts && sources.reverse();
+	//		while (++i0 < i) merged.push(...sources[i0]);
+	//		
+	//		return merged;
+	//		
+	//	}
+	//	
+	//	return null;
+	//	
+	//}
 	
 	// 第一引数に指定した Node を継承するオブジェクトを、JSON 互換のオブジェクトでコピーする。
 	// 戻り値は HTMLCustomElement.nodify の第一引数に指定することができる。
@@ -358,7 +441,9 @@ export class HTMLCustomElement extends HTMLElement {
 		
 		super();
 		
-		const { $acc, $assignedBind, $init, $observedAttributes, bindAll } = HTMLCustomElement, { constructor } = this;
+		const	{ $acc, $assignedBind, $init, $observedAttributes, bindAll } = HTMLCustomElement,
+				{ constructor } = this;
+		let i;
 		
 		this[$acc] = {},
 		
@@ -423,6 +508,43 @@ export class HTMLCustomElement extends HTMLElement {
 		const { recursive, recursiveDOMFilter } = HTMLCustomElement;
 		
 		recursive(this, this[HTMLCustomElement.$deleteAll], recursiveDOMFilter, args, acKeys), this.remove();
+		
+	}
+	
+	// EventTarget.prototype.dispatchEvent() のラッパー関数。
+	// 第一引数 type にイベント名、第二引数 detail にイベント通知先に渡すデータ、第三引数 flags にイベントの通知方式を指定する。
+	// flags には任意の HTMLCustomElement.EMIT_OPTIONS_BUBBLES,EMIT_OPTIONS_CANCELABLE,EMIT_OPTIONS_COMPOSED を指定する。
+	// 例えば customElement.emit('any', { a: 0 }, HTMLCustomElement.EMIT_OPTIONS_BUBBLES | HTMLCustomElement.EMIT_OPTIONS_CANCELABLE) であれば、
+	// customElement.dispatchEvent(new CustomEvent('any', { bubbles: true, cancelable: true, detail: { a: 0 } })) と同等になる。
+	emit(type, detail, flags) {
+		
+		const	{ emitOptions } = HTMLCustomElement,
+				length = emitOptions.length,
+				option = detail === undefined ? {} : { detail };
+		let i;
+		
+		i = -1;
+		while (++i < length) option[emitOptions[i]] = !!(2**i & flags);
+		
+		this.dispatchEvent(new CustomEvent(type, option));
+		
+	}
+	// customElement.emit(type, detail, HTMLCustomElement.EMIT_OPTIONS_BUBBLES) のショートカット関数。
+	// 第三引数 composed に true を指定すると HTMLCustomElement.EMIT_OPTIONS_COMPOSED も指定される。
+	bubble(type, detail, composed) {
+		
+		const { EMIT_OPTIONS_BUBBLES, EMIT_OPTIONS_COMPOSED } = HTMLCustomElement;
+		
+		this.emit(type, detail, EMIT_OPTIONS_BUBBLES | (!composed || EMIT_OPTIONS_COMPOSED));
+		
+	}
+	// customElement.emit(type, detail, HTMLCustomElement.EMIT_OPTIONS_BUBBLES | HTMLCustomElement.EMIT_OPTIONS_CANCELABLE) のショートカット関数。
+	// 第三引数 composed に true を指定すると HTMLCustomElement.EMIT_OPTIONS_COMPOSED も指定される。
+	cancelableBubble(type, detail, composed) {
+		
+		const { EMIT_OPTIONS_BUBBLES, EMIT_OPTIONS_CANCELABLE, EMIT_OPTIONS_COMPOSED } = HTMLCustomElement;
+		
+		this.emit(type, detail, EMIT_OPTIONS_BUBBLES | EMIT_OPTIONS_CANCELABLE | (!composed || EMIT_OPTIONS_COMPOSED));
 		
 	}
 	
@@ -542,6 +664,13 @@ HTMLCustomElement[HTMLCustomElement.$define] = function (customElement) {
 	customElements.define(customElement.tagName, customElement);
 	
 },
+HTMLCustomElement.prototype[HTMLCustomElement.$init] = function () {
+	
+	const	{ $init, getStaticProperties, getStaticFunctionsTest } = HTMLCustomElement;
+	
+	for (const v of getStaticProperties(this, $init, true, getStaticFunctionsTest)) v.call(this);
+	
+},
 HTMLCustomElement.define();
 
 export default class HTMLCustomShadowElement extends HTMLCustomElement {
@@ -562,7 +691,7 @@ export default class HTMLCustomShadowElement extends HTMLCustomElement {
 			
 			observed() {
 				
-				this.updateTemplate();
+				this[HTMLCustomShadowElement.$init]();
 				
 			}
 			
@@ -570,17 +699,17 @@ export default class HTMLCustomShadowElement extends HTMLCustomElement {
 		
 	};
 	
-	constructor() {
+	static [HTMLCustomElement.$init]() {
 		
-		super();
+		const	{ $init, getStaticProperties, getStaticFunctionsTest } = HTMLCustomShadowElement;
+		
+		for (const v of getStaticProperties(this, $init, true, getStaticFunctionsTest)) v.call(this);
 		
 	}
 	
-	[HTMLCustomElement.$init]() {
+	constructor() {
 		
-		this.shadowRoot || (this.attachShadow(this.constructor.shadowOption), this.updateTemplate()),
-		
-		this[HTMLCustomShadowElement.$init]?.();
+		super();
 		
 	}
 	
@@ -589,8 +718,19 @@ export default class HTMLCustomShadowElement extends HTMLCustomElement {
 		const	{ shadowRoot, template: templateId } = this, template = document.getElementById(templateId);
 		
 		template instanceof HTMLTemplateElement &&
-			(aborts && this.abort(), shadowRoot.replaceChildren(template.content.cloneNode(true)))
+			(aborts && this.abortAll(), shadowRoot.replaceChildren(template.content.cloneNode(true)))
 		
 	}
 	
 }
+HTMLCustomShadowElement[HTMLCustomShadowElement.$init] = function () {
+	
+	this.shadowRoot || this.attachShadow(this.constructor.shadowOption),
+	this.updateTemplate(true);
+	
+},
+HTMLCustomShadowElement.prototype[HTMLCustomShadowElement.$init] = function () {
+	
+	HTMLCustomShadowElement[HTMLCustomElement.$init].call(this);
+	
+};

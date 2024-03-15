@@ -3,7 +3,7 @@ import HTMLCustomShadowElement from './html-custom-element.js';
 export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
-	static STORAGE_KEY_PREFIX = 'odd-docs@'
+	static STORAGE_KEY_PREFIX = 'od-docs@'
 	static tagName = 'doc-man';
 	
 	static [HTMLCustomShadowElement.$attribute] = {
@@ -13,15 +13,25 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 		interactedCloseButton(event) {
 			
-			
-			
-			this.dispatchEvent(new CustomEvent('save'));
+			this.dispatchEvent(new CustomEvent('close'));
 			
 		},
 		
 		interactedSaveButton(event) {
 			
-			this.dispatchEvent(new CustomEvent('close'));
+			this.dispatchEvent(new CustomEvent('save', { bubbles: true, composed: true, detail: event }));
+			
+		},
+		
+		mutated(event) {
+			
+			this.classList.add('mutated');
+			
+		},
+		
+		saved() {
+			
+			this.classList.remove('mutated');
 			
 		}
 		
@@ -76,6 +86,17 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
+	static [HTMLCustomShadowElement.$init]() {
+		
+		const { closeButton, interactedCloseButton, interactedSaveButton, mutated, saveButton, saved, shadowRoot } = this;
+		
+		this.addListener(this, 'mutated', mutated),
+		this.addListener(this, 'saved', saved),
+		this.addListener(closeButton, 'click', interactedCloseButton),
+		this.addListener(saveButton, 'click', interactedSaveButton);
+		
+	}
+	
 	constructor() {
 		
 		super();
@@ -87,18 +108,23 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	[HTMLCustomShadowElement.$init]() {
+	[Symbol.iterator]() {
 		
-		const { closeButton, interactedCloseButton, interactedSaveButton, saveButton } = this;
-		
-		this.addListener(closeButton, 'click', interactedCloseButton),
-		this.addListener(saveButton, 'click', interactedSaveButton);
+		return this.container?.querySelectorAll?.(':scope > scenarios-node') ?? [][Symbol.iterator]();
 		
 	}
 	
-	[Symbol.iterator]() {
+	add(...scenarios) {
 		
-		return this.container.querySelectorAll(':scope > scenarios-node');
+		const { scenariosNodeTabsContainer, scenariosNodeTabViewsContainer } = this, length = scenarios.length, tabs = [];
+		let i, tab;
+		
+		i = -1;
+		while (++i < length)
+			scenarios[i] = (tabs[i] = tab = document.createElement('tab-node')).set(scenarios[i], 'ho', 'scenarios');
+		
+		scenariosNodeTabsContainer.append(...tabs),
+		scenariosNodeTabViewsContainer.append(...scenarios);
 		
 	}
 	
@@ -149,14 +175,34 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		return this.shadowRoot?.getElementById?.('created-time');
 		
 	}
+	get name() {
+		
+		return this.nameInput?.value || '文書';
+		
+	}
 	get nameInput() {
 		
 		return this.shadowRoot?.getElementById?.('name');
 		
 	}
+	get nameWithIcon() {
+		
+		return '🖊️ ' + this.nameInput.value;
+		
+	}
 	get saveButton() {
 		
 		return this.shadowRoot?.getElementById?.('save');
+		
+	}
+	get scenariosNodeTabsContainer() {
+		
+		return this.shadowRoot?.getElementById('scenarios-node-tabs-container');
+		
+	}
+	get scenariosNodeTabViewsContainer() {
+		
+		return this.shadowRoot?.getElementById('scenarios-node-tab-views-container');
 		
 	}
 	get uid() {
@@ -200,4 +246,4 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	}
 	
 }
-HTMLDocsManagerElement.define();
+HTMLDocManagerElement.define();

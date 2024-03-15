@@ -1,0 +1,79 @@
+@import url("common.css");
+
+:host {
+	
+	display: block;
+	width: 100%;
+	
+}
+
+#root {
+	
+	box-sizing: border-box;
+	height: 100%;
+	padding: 1rem;
+	position: relative;
+	width: 100%;
+	writing-mode: vertical-rl;
+	
+}
+
+header {
+	
+	align-items: center;
+	display: flex;
+	margin: 0 0 0 1rem;
+	
+}
+
+#ctrl {
+	
+	align-items: center;
+	display: flex;
+	
+}
+#ctrl > * {
+	
+	flex: 1 0 max-content;
+	
+}
+#name {
+	
+	box-sizing: border-box;
+	flex: 0 1 auto;
+	height: 100%;
+	margin: .4rem;
+	padding: .5rem;
+	
+}
+
+#scenarios-node-tabs-container {
+	
+	display: block;
+	
+}
+
+#scenarios-node-tabs-container > tab-node {
+	
+	display: block;
+	width: 100%;
+	
+}
+#scenarios-node-tab-views-container {
+	
+	display: block;
+	width: 100%;
+	
+}
+#scenarios-node-tab-views-container > tab-node {
+	
+	display: block;
+	width: 100%;
+	
+}
+
+:host(.mutated) #save {
+	
+	border: 2px solid red;
+	
+}

@@ -3,7 +3,7 @@ import HTMLCustomShadowElement from './html-custom-element.js';
 export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
-	static STORAGE_KEY_PREFIX = 'odd-docs@'
+	static STORAGE_KEY_PREFIX = '1dse@';
 	static tagName = 'docs-man';
 	
 	static [HTMLCustomShadowElement.$attribute] = {
@@ -13,30 +13,21 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		
 		interactedCreateButton(event) {
 			
-			this.container.appendChild(document.createElement('scenarios-node'));
+			const { docTabsContainer, docTabViewsContainer } = this,
+					tab = document.createElement('tab-node'),
+					doc = document.createElement('doc-man'),
+					content = document.createElement('span'),
+					editor = document.createElement('editable-element');
 			
-		},
-		
-		interactedSaveButton(event) {
+			doc.add(document.createElement('scenarios-node')),
 			
-			const { docNameInput: { value: docName } } = this;
+			content.textContent = doc.name,
+			content.slot = 'editor',
 			
-			if (docName) {
-				
-				const	{ getStorage, setStorage, take } = HTMLDocsManagerElement,
-						{ id } = this,
-						data = getStorage(id),
-						{ docs = [] } = data,
-						index = take(docs, name, docName, true),
-						{ length } = docs;
-				
-				(data.docs = docs)[index < length ? index : length] =
-					JSON.stringify(HTMLCustomShadowElement.jsonalize(this.container.childNodes)),
-				//hi(this.container.replaceChildren(...HTMLCustomShadowElement.nodify(docs)[index < length ? index : length]));
-				//return;
-				setStorage(id, data);
-				
-			}
+			editor.appendChild(content),
+			
+			docTabsContainer.appendChild(tab),
+			docTabViewsContainer.appendChild(tab.set(doc, 'doc', editor));
 			
 		},
 		
@@ -48,6 +39,42 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 					{ docSelector } = this;
 			
 			this.container.replaceChildren(...HTMLCustomShadowElement.nodify(JSON.parse(docs[docSelector.selectedIndex])));
+			
+		},
+		
+		emittedSaving(event) {
+			
+			const doc = event.composedPath()[0];
+			
+			if (doc?.tagName === 'DOC-MAN') {
+				
+				const	{ getStorage, setStorage, take } = HTMLDocsManagerElement,
+						{ id } = this,
+						{ uid } = doc,
+						data = getStorage(id),
+						{ docs = [] } = data,
+						index = take(docs, 'uid', uid, true),
+						{ length } = docs;
+				
+				(data.docs = docs)[index < length ? index : length] =
+					{ uid, doc: JSON.stringify(HTMLCustomShadowElement.jsonalize(doc)) },
+				
+				/*setStorage(id, data)*/true && doc.bubble('saved', this, true);
+				
+			}
+			
+		},
+		
+		mutated(event) {
+			
+			/^❣️\s*/.test(document.title) || (document.title = '❣️ ' + document.title);
+			
+		},
+		
+		saved(event) {
+			
+			this.container.querySelectorAll(':scope > doc-man.mutated').length ||
+				(document.title = document.title.replace(/^❣️\s*/, ''))
 			
 		}
 		
@@ -95,13 +122,17 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 				loader[key || DEFAULT_STORAGE_KEY] = data,
 				localStorage.setItem(primaryKey, JSON.stringify(loader));
 				
+				return true;
+				
 			} catch (error) {
 				
-				return false;
+				console.warn(error);
 				
 			}
 			
-		} else return false;
+		}
+		
+		return false;
 		
 	}
 	
@@ -139,6 +170,28 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
+	static [HTMLCustomShadowElement.$init]() {
+		
+		const	{
+					createButton,
+					docSaveButton,
+					docSelectorButton,
+					emittedSaving,
+					interactedCreateButton,
+					interactedSaveButton,
+					interactedSelectorButton,
+					mutated,
+					saved
+				} = this;
+		
+		this.addListener(createButton, 'click', interactedCreateButton),
+		this.addListener(docSelectorButton, 'click', interactedSelectorButton),
+		this.addListener(this, 'save', emittedSaving),
+		this.addListener(this, 'mutated', mutated),
+		this.addListener(this, 'saved', saved);
+		
+	}
+	
 	constructor() {
 		
 		super();
@@ -149,26 +202,9 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	[HTMLCustomShadowElement.$init]() {
-		
-		const	{
-					createButton,
-					interactedCreateButton,
-					interactedSaveButton,
-					interactedSelectorButton,
-					docSaveButton,
-					docSelectorButton
-				} = this;
-		
-		this.addListener(createButton, 'click', interactedCreateButton),
-		this.addListener(docSaveButton, 'click', interactedSaveButton),
-		this.addListener(docSelectorButton, 'click', interactedSelectorButton);
-		
-	}
-	
 	[Symbol.iterator]() {
 		
-		return this.container.querySelectorAll(':scope > scenarios-node');
+		return this.container?.querySelectorAll?.(':scope > scenarios-node') ?? [][Symbol.iterator]();
 		
 	}
 	
@@ -240,16 +276,16 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		return this.shadowRoot?.getElementById?.('doc-close');
 		
 	}
-	get docNameInput() {
-		
-		return this.shadowRoot?.getElementById?.('doc-name');
-		
-	}
-	get docSaveButton() {
-		
-		return this.shadowRoot?.getElementById?.('doc-save');
-		
-	}
+	//get docNameInput() {
+	//	
+	//	return this.shadowRoot?.getElementById?.('doc-name');
+	//	
+	//}
+	//get docSaveButton() {
+	//	
+	//	return this.shadowRoot?.getElementById?.('doc-save');
+	//	
+	//}
 	get docSelector() {
 		
 		return this.shadowRoot?.getElementById?.('doc-selector');
@@ -258,6 +294,16 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 	get docSelectorButton() {
 		
 		return this.shadowRoot?.getElementById?.('doc-selector-button');
+		
+	}
+	get docTabsContainer() {
+		
+		return this.shadowRoot?.getElementById?.('doc-tabs');
+		
+	}
+	get docTabViewsContainer() {
+		
+		return this.shadowRoot?.getElementById?.('doc-tab-views');
 		
 	}
 	

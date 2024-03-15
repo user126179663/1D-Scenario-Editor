@@ -45,6 +45,33 @@ export default class HTMLEditableElement extends HTMLCustomShadowElement {
 			
 		},
 		
+		changedSlot(event) {
+			
+			const { target } = event, editor = target.assignedNodes()[0];
+			
+			if (editor) {
+				
+				const { blurred, constructor: { moInit }, editor, mutated, observedEditor } = this;
+				
+				(this.observer = new MutationObserver(observedEditor)).observe(editor, moInit),
+				
+				this.addListener(editor, 'input', mutated),
+				this.addListener(editor, 'blur', blurred),
+				
+				this.updateEditable(),
+				
+				this.dispatchEvent(new CustomEvent('changed-editable', { detail: this.hasAttribute('editable') }));
+				
+			}
+			
+		},
+		
+		mutated(event) {
+			
+			this.dispatchEvent(new CustomEvent('mutated', { bubbles: true, composed: true, detail: event }));
+			
+		},
+		
 		switched() {
 			
 			const { switcher: { checked } } = this;
@@ -79,30 +106,20 @@ export default class HTMLEditableElement extends HTMLCustomShadowElement {
 		
 	};
 	
-	constructor() {
+	static [HTMLCustomShadowElement.$init]() {
 		
-		super();
+		const { changedSlot, editor, editorSlot, switched, switcher } = this;
+		
+		this.addListener(switcher, 'change', switched),
+		this.addListener(editorSlot, 'slotchange', changedSlot),
+		
+		editor && editorSlot.dispatchEvent(new Event('slotchange'));
 		
 	}
 	
-	[HTMLCustomShadowElement.$init]() {
+	constructor() {
 		
-		const { editor } = this;
-		
-		if (editor) {
-			
-			const { blurred, constructor: { moInit }, editor, observedEditor, switched, switcher } = this;
-			
-			(this.observer = new MutationObserver(observedEditor)).observe(editor, moInit),
-			
-			this.addListener(switcher, 'change', switched),
-			this.addListener(editor, 'blur', blurred)
-			
-			this.updateEditable(),
-			
-			this.dispatchEvent(new CustomEvent('changed-editable', { detail: this.hasAttribute('editable') }));
-			
-		}
+		super();
 		
 	}
 	
@@ -116,7 +133,9 @@ export default class HTMLEditableElement extends HTMLCustomShadowElement {
 	
 	updateEditable(value = this.hasAttribute('editable')) {
 		
-		const { editor, switcher } = this;
+		const { beforeInput, editor, switcher } = this;
+		
+		this.addListener(editor, 'input', beforeInput),
 		
 		editor.toggleAttribute('contenteditable', switcher.checked = value),
 		editor.toggleAttribute('readonly', !value),
@@ -168,9 +187,14 @@ export default class HTMLEditableElement extends HTMLCustomShadowElement {
 	}
 	get editor() {
 		
-		const { constructor: { editorAssignNodesOption }, shadowRoot } = this;
+		const { constructor: { editorAssignNodesOption }, editorSlot } = this;
 		
-		return shadowRoot.getElementById('editor')?.assignedNodes?.(editorAssignNodesOption)?.[0];
+		return editorSlot?.assignedNodes?.(editorAssignNodesOption)?.[0];
+		
+	}
+	get editorSlot() {
+		
+		return this.shadowRoot.getElementById('editor');
 		
 	}
 	get label() {

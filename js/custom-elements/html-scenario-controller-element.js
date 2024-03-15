@@ -45,18 +45,18 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 	};
 	
-	constructor() {
-		
-		super();
-		
-	}
-	
-	[HTMLCustomShadowElement.$init]() {
+	static [HTMLCustomShadowElement.$init]() {
 		
 		const { changedEditable, changedEditableSub, editor, subTextEditor } = this;
 		
 		this.addListener(editor, 'changed-editable', changedEditable),
 		this.addListener(subTextEditor, 'changed-editable', changedEditableSub);
+		
+	}
+	
+	constructor() {
+		
+		super();
 		
 	}
 	

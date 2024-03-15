@@ -70,13 +70,7 @@ export default class HTMLImageLoaderElement extends HTMLCustomShadowElement {
 		
 	};
 	
-	constructor() {
-		
-		super();
-		
-	}
-	
-	[HTMLCustomShadowElement.$init]() {
+	static [HTMLCustomShadowElement.$init]() {
 		
 		const { changedFile, changedURL, fileInput, imageSlot, slottedFetcher, switched, switcher, urlInput } = this;
 		
@@ -86,6 +80,12 @@ export default class HTMLImageLoaderElement extends HTMLCustomShadowElement {
 		
 		this.addListener(fileInput, 'change', changedFile),
 		this.addListener(urlInput, 'change', changedURL);
+		
+	}
+	
+	constructor() {
+		
+		super();
 		
 	}
 	

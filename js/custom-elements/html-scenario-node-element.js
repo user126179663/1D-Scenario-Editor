@@ -14,9 +14,24 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 				
 			}
 			
+		},
+		
+		mutated(event) {
 		}
 		
 	};
+	
+	static [HTMLCustomShadowElement.$bind] = {
+		
+		
+		
+	};
+	
+	static [HTMLCustomShadowElement.$init]() {
+		
+		
+		
+	}
 	
 	constructor() {
 		
@@ -24,21 +39,15 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	[HTMLCustomShadowElement.$init]() {
-		
-		
-		
-	}
-	
 	*[Symbol.iterator]() {
 		
 		const { begin, branch, end } = this;
 		
-		yield begin;
+		begin && (yield begin);
 		
-		for (const v of branch) yield v;
+		if (branch) for (const v of branch) yield v;
 		
-		yield end;
+		end && (yield end);
 		
 	}
 	

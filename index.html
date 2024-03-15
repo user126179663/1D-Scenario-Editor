@@ -2,10 +2,10 @@
 <html lang="ja">
 	<head>
 		<meta charset="UTF-8">
-		<title></title>
+		<title>1D Scenario Editor</title>
 		<link rel="stylesheet" href="css/default.css">
 		<script src="js/utils.js"></script>
-		<script type="module" src="js/load.js"></script>
+		<script type="module" src="js/import.js"></script>
 	</head>
 	<body>
 		
@@ -17,24 +17,29 @@
 			
 			<section id="root">
 				
-				<header>
-					<div id="doc-selector-node">
-						<button id="create" type="button">新規作成</button>
-						<button id="doc-selector-button" type="button">開く</button>
-						<button id="doc-delete-button" type="button">削除</button>
-						<select id="doc-selector"></select>
-					</div>
-					<div id="doc-name-node">
-						<button id="doc-save" type="button">保存</button>
-						<button id="doc-close" type="button">閉じる</button>
-						<label for="doc-name">文書名</label>
-						<input id="doc-name" value="sample"></input>
-					</div>
-				</header>
-				
 				<div id="notification"></div>
 				
-				<section id="container"></section>
+				<header>
+					
+					<io-point>
+						<nav id="menu">
+							<div id="doc-menu">
+								<button id="create" type="button" data-iop-inactivatable>新規作成</button>
+								<div class="hr">🗂️</div>
+								<div id="storage-menu">
+									<select id="doc-selector"></select>
+									<button id="doc-selector-button" type="button" data-iop-inactivatable>開く</button>
+									<button id="doc-delete-button" type="button" data-iop-inactivatable>削除</button>
+								</div>
+							</div>
+						</nav>
+					</io-point>
+					
+					<section id="doc-tabs"></section>
+					
+				</header>
+				
+				<section id="doc-tab-views"></section>
 				
 			</section>
 			
@@ -56,13 +61,17 @@
 					</div>
 					<div id="ctrl">
 						<button id="save" type="button">保存</button>
-						<button id="close" type="button">閉じる</button>
+						<!--<button id="close" type="button">閉じる</button>
 						<label for="name">文書名</label>
-						<input id="name" value="sample">
+						<input id="name" value="">-->
 					</div>
+					<section id="scenarios-node-tabs-container"></section>
 				</header>
 				
-				<section id="container"></section>
+				
+				<section id="scenarios-node-tab-views-container"></section>
+				
+				<!--<section id="container"></section>-->
 				
 			</section>
 			
@@ -89,7 +98,10 @@
 					</img-loader>
 				</header>
 				
+				<section id="scenarios-tabs"></section>
+				
 				<section id="scenarios"></section>
+				<!--<section id="scenarios"></section>-->
 				
 				<section id="ctrl">
 					<button id="add" type="button">📝</button>
@@ -126,7 +138,7 @@
 			<div id="root">
 				
 				<header id="header">
-					<div id="title"></div>
+					<div id="title"><slot name="title"></slot></div>
 					<div id="ctrl">
 						<button id="delete" type="button">❌</button>
 					</div>
@@ -139,6 +151,27 @@
 			</div>
 			
 		</template>
+		
+		<!--<template id="node-element">
+			
+			<link rel="stylesheet" href="css/html-node-element.css">
+			
+			<div id="root">
+				
+				<header id="header">
+					<div id="title"></div>
+					<div id="ctrl">
+						<button id="delete" type="button">❌</button>
+					</div>
+				</header>
+				
+				<section id="body"><slot name="node"></slot></section>
+				
+				<footer id="footer"></footer>
+				
+			</div>
+			
+		</template>-->
 		
 		<template id="scenario-node">
 			
@@ -231,6 +264,16 @@
 				
 			</div>
 			
+		</template>
+		
+		<template id="tab-button">
+			<link rel="stylesheet" href="css/html-tab-button-element.css">
+			<section id="root">
+				<div id="content"><div id="icon"><slot name="icon"></slot></div><slot name="content"></slot></div>
+				<div id="ctrl">
+					<button id="close" type="button">❌</button>
+				</div>
+			</section>
 		</template>
 		
 	</body>

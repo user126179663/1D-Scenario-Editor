@@ -1,5 +1,4 @@
 import HTMLCustomShadowElement from './html-custom-element.js';
-import HTMLNodeElement from './html-node-element.js';
 
 export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 	
@@ -9,25 +8,19 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 		
 		interactedAddButton() {
 			
-			const node = document.createElement('node-element'), scenario = document.createElement('scenario-node');
+			const	{ scenariosNode, scenariosTabsNode } = this,
+					tab = document.createElement('tab-node');
 			
-			scenario.slot = 'node'
+			tab.group = 'scenarios',
 			
-			node.appendChild(scenario),
-			
-			this.scenariosNode.appendChild(node);
+			scenariosNode.appendChild(tab),
+			scenariosTabsNode.appendChild(tab.constrain(document.createElement('scenario-node')));
 			
 		}
 		
 	};
 	
-	constructor() {
-		
-		super();
-		
-	}
-	
-	[HTMLCustomShadowElement.$init]() {
+	static [HTMLCustomShadowElement.$init]() {
 		
 		const { addButton, interactedAddButton } = this;
 		
@@ -35,9 +28,15 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
+	constructor() {
+		
+		super();
+		
+	}
+	
 	[Symbol.iterator]() {
 		
-		return this.shadowRoot.getElementById('scenarios')?.querySelectorAll?.('node-element');
+		return this.shadowRoot.getElementById('scenarios')?.querySelectorAll?.('node-element') ?? [][Symbol.iterator]();
 		
 	}
 	
@@ -55,7 +54,12 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 	
 	get scenariosNode() {
 		
-		return this.shadowRoot.getElementById('scenarios');
+		return this.shadowRoot?.getElementById?.('scenarios');
+		
+	}
+	get scenariosTabsNode() {
+		
+		return this.shadowRoot?.getElementById?.('scenarios-tabs');
 		
 	}
 	get addButton() {

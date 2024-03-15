@@ -15,17 +15,17 @@ export default class HTMLNodeElement extends HTMLCustomShadowElement {
 		
 	};
 	
-	constructor() {
-		
-		super();
-		
-	}
-	
-	[HTMLCustomShadowElement.$init]() {
+	static [HTMLCustomShadowElement.$init]() {
 		
 		const { deleteButton, interactedDeleteButton } = this;
 		
 		this.addListener(deleteButton, 'click', interactedDeleteButton);
+		
+	}
+	
+	constructor() {
+		
+		super();
 		
 	}
 	

@@ -1,0 +1,48 @@
+*, ::slotted(*) {
+	margin: 0;
+	padding: 0;
+}
+
+#root {
+	
+	align-items: center;
+	border-radius: .4rem;
+	box-shadow:	0px 0px 0px 1px rgba(0,0,0,.8),
+					0px 0px 0px 1px rgba(255,255,255,.9) inset,
+					0px .2rem .3rem .05rem rgba(0,0,0,.1);
+	display: flex;
+	flex-direction: row;
+	font: normal normal normal .9rem/1 sans-serif;
+	height: 100%;
+	justify-content: space-between;
+	margin: .1rem;
+	max-height: 8rem;
+	min-height: 100px;
+	padding: .5rem .54rem;
+	position: relative;
+	
+}
+
+#content {
+	
+	align-items: center;
+	display: flex;
+	
+}
+#icon {
+	
+	margin-bottom: .2rem;
+	
+}
+
+#ctrl {
+	
+	display: none;
+	
+}
+
+:host(tab-node[selected]) {
+	
+	display: block;
+	
+}

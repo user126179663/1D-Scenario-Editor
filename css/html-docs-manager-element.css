@@ -1,38 +1,82 @@
-:host(scenarios-loader) {
+@import url("common.css");
+
+:host {
 	
 	display: block;
-	height: 100%;
 	width: 100%;
 	
 }
 
 #root {
 	
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 	height: 100%;
+	padding: 1rem;
 	position: relative;
 	writing-mode: vertical-rl;
 	width: 100%;
 	
 }
 
+#doc-tabs {
+	
+	padding: .4rem;
+	z-index: 2;
+	
+}
+
 header {
 	
+	align-items: center;
+	border-left: 1px solid rgba(160,160,160,1);
+	display: flex;
+	margin-left: .0rem;
+	padding-left: .8rem;
 	position: sticky;
 	right: 0;
 	top: 0;
+	z-index: 1;
 	
 }
 
-#container {
+#menu {
 	
-	align-items: center;
+	--menu-width: 12rem;
+	
+	display: flex;
+	flex-direction: column;
+	position: absolute;
+	right: 0;
+	top: var(--size);
+	width: var(--menu-width);
+	writing-mode: horizontal-tb;
+	
+}
+#doc-menu {
+	display: flex;
+	flex-direction: column;
+}
+
+#storage-menu {
+	
+	display: flex;
+	flex-direction: column;
+	
+}
+
+#doc-tab-views {
+	
+	box-sizing: border-box;
 	display: flex;
 	flex-direction: column;
 	width: 100%;
+	z-index: 0;
 	
 }
 
-#container > * {
+#doc-tab-views > tab-view {
 	
 	display: block;
 	width: 100%;
