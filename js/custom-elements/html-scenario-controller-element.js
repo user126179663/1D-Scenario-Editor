@@ -41,13 +41,37 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 			
 			this.syncEditorEditable(event.target, 'editable-sub');
 			
+		},
+		
+		interactedCreateSingleLineButton(event) {
+			
+			this.add({ isLine: true });
+			
+		},
+		
+		interactedCreateParagraphButton(event) {
+			
+			this.add(null);
+			
 		}
 		
 	};
 	
 	static [HTMLCustomShadowElement.$init]() {
 		
-		const { changedEditable, changedEditableSub, editor, subTextEditor } = this;
+		const	{
+					changedEditable,
+					changedEditableSub,
+					createSingleLineButton,
+					createParagraphButton,
+					editor,
+					interactedCreateSingleLineButton,
+					interactedCreateParagraphButton,
+					subTextEditor
+				} = this;
+		
+		this.addListener(createSingleLineButton, 'click', interactedCreateSingleLineButton),
+		this.addListener(createParagraphButton, 'click', interactedCreateParagraphButton),
 		
 		this.addListener(editor, 'changed-editable', changedEditable),
 		this.addListener(subTextEditor, 'changed-editable', changedEditableSub);
@@ -57,6 +81,41 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 	constructor() {
 		
 		super();
+		
+	}
+	
+	add(...values) {
+		
+		const { paragraphs } = this, { length } = values;
+		let i,v, editor, node;
+		
+		i = -1;
+		while (++i < length) {
+			
+			if ((v = values[i])?.tagName !== 'EDITABLE-ELEMENT') {
+				
+				if (!(v instanceof HTMLElement)) {
+					
+					typeof v === 'string' && (v = { value: v }),
+					(v && typeof v === 'object') || (v = {});
+					
+					const { isLine, value } = v;
+					
+					(editor = document.createElement(isLine ? 'input' : 'textarea')).value = value ?? '';
+					
+				}
+				
+				(editor ||= v).slot = 'editor',
+				(v = document.createElement('editable-element')).appendChild(editor),
+				editor = undefined;
+				
+			}
+			
+			(values[i] = document.createElement('node-element')).appendChild(v).slot = 'node';
+			
+		}
+		
+		paragraphs.append(...values);
 		
 	}
 	
@@ -99,9 +158,24 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 	}
 	
+	get createSingleLineButton() {
+		
+		return this.shadowRoot?.getElementById('create-single-line');
+		
+	}
+	get createParagraphButton() {
+		
+		return this.shadowRoot?.getElementById('create-paragraph');
+		
+	}
 	get editor() {
 		
 		return this.shadowRoot?.getElementById('editor');
+		
+	}
+	get paragraphs() {
+		
+		return this.shadowRoot?.getElementById('paragraphs');
 		
 	}
 	get subTextEditor() {
@@ -109,9 +183,29 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		return this.shadowRoot?.getElementById('sub-text');
 		
 	}
-	get title() {
+	get titleNode() {
 		
 		return this.getElementById('title')?.assignedNodes?.(HTMLScenarioControllerElement.assignedNodesOption)?.[0];
+		
+	}
+	get text() {
+		
+		return this.editor.content;
+		
+	}
+	set text(v) {
+		
+		this.editor.content = v;
+		
+	}
+	get subText() {
+		
+		return this.subTextEditor.value;
+		
+	}
+	set subText(v) {
+		
+		this.subTextEditor.value = v;
 		
 	}
 	

@@ -1,3 +1,5 @@
+@import url("common.css");
+
 *, ::slotted(*) {
 	margin: 0;
 	padding: 0;

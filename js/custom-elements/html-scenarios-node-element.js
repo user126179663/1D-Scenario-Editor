@@ -8,13 +8,12 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 		
 		interactedAddButton() {
 			
-			const	{ scenariosNode, scenariosTabsNode } = this,
-					tab = document.createElement('tab-node');
+			const	{ scenariosContainer, scenariosTabsContainer } = this,
+					tabButton = document.createElement('tab-button'),
+					{ tab, view } = tabButton.impliment('scenarios', document.createElement('scenario-node'), 'sample');
 			
-			tab.group = 'scenarios',
-			
-			scenariosNode.appendChild(tab),
-			scenariosTabsNode.appendChild(tab.constrain(document.createElement('scenario-node')));
+			scenariosTabsContainer.appendChild(tab),
+			scenariosContainer.appendChild(view);
 			
 		}
 		
@@ -40,6 +39,29 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
+	add(...nodes) {
+		
+		const { scenariosContainer, scenariosTabsContainer } = this, { length } = nodes, tabs = [];
+		let i, node;
+		
+		i = -1;
+		while (++i < length) {
+			
+			(node = document.createElement('node-element')).appendChild(nodes[i]).slot = 'node';
+			
+			const { tab, view } = document.createElement('tab-button').impliment('scenarios', node, '章');
+			
+			tabs[i] = tab, nodes[i] = view;
+			
+		}
+		
+		scenariosTabsContainer.append(...tabs),
+		scenariosContainer.append(...nodes),
+		
+		tabs[length - 1].select();
+		
+	}
+	
 	toJSON() {
 		
 		const nodes = [];
@@ -52,12 +74,12 @@ export default class HTMLScenariosNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	get scenariosNode() {
+	get scenariosContainer() {
 		
 		return this.shadowRoot?.getElementById?.('scenarios');
 		
 	}
-	get scenariosTabsNode() {
+	get scenariosTabsContainer() {
 		
 		return this.shadowRoot?.getElementById?.('scenarios-tabs');
 		

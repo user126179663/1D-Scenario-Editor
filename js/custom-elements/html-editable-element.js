@@ -209,6 +209,16 @@ export default class HTMLEditableElement extends HTMLCustomShadowElement {
 		return this.shadowRoot.getElementById('switch');
 		
 	}
+	get value() {
+		
+		return this.editor?.value;
+		
+	}
+	set value(v) {
+		
+		this.editor.value = ''+v;
+		
+	}
 	
 }
 HTMLEditableElement.define();

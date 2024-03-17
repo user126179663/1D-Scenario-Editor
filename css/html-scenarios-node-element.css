@@ -1,3 +1,5 @@
+@import url("common.css");
+
 :host(scenarios-node) {
 	
 	height: 100%;

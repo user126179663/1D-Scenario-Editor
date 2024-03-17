@@ -11,15 +11,27 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	
 	static [HTMLCustomShadowElement.$bind] = {
 		
+		interactedCreateNewEditionButton(event) {
+			
+			const	scenariosNode = document.createElement('scenarios-node'),
+					scenarioNode = document.createElement('scenario-node');
+			
+			scenarioNode.add(null),
+			scenariosNode.add(scenarioNode),
+			
+			this.add(scenariosNode);
+			
+		},
+		
 		interactedCloseButton(event) {
 			
-			this.dispatchEvent(new CustomEvent('close'));
+			this.bubble('close', event, true);
 			
 		},
 		
 		interactedSaveButton(event) {
 			
-			this.dispatchEvent(new CustomEvent('save', { bubbles: true, composed: true, detail: event }));
+			this.bubble('save', event, true);
 			
 		},
 		
@@ -88,7 +100,22 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	
 	static [HTMLCustomShadowElement.$init]() {
 		
-		const { closeButton, interactedCloseButton, interactedSaveButton, mutated, saveButton, saved, shadowRoot } = this;
+		const	{
+					closeButton,
+					createNewEditionButton,
+					createNextEditionButton,
+					interactedCloseButton,
+					interactedCreateNewEditionButton,
+					interactedCreateNextEditionButton,
+					interactedSaveButton,
+					mutated,
+					saveButton,
+					saved,
+					shadowRoot
+				} = this;
+		
+		this.addListener(createNewEditionButton, 'click', interactedCreateNewEditionButton),
+		this.addListener(createNextEditionButton, 'click', interactedCreateNextEditionButton),
 		
 		this.addListener(this, 'mutated', mutated),
 		this.addListener(this, 'saved', saved),
@@ -116,15 +143,24 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	
 	add(...scenarios) {
 		
-		const { scenariosNodeTabsContainer, scenariosNodeTabViewsContainer } = this, length = scenarios.length, tabs = [];
-		let i, tab;
+		const	{ scenariosNodeTabsContainer, scenariosNodeTabViewsContainer } = this,
+				length = scenarios.length,
+				tabs = [];
+		let i;
 		
 		i = -1;
-		while (++i < length)
-			scenarios[i] = (tabs[i] = tab = document.createElement('tab-node')).set(scenarios[i], 'ho', 'scenarios');
+		while (++i < length) {
+			
+			const { tab, view } = document.createElement('tab-button').impliment('scenarios', scenarios[i], '題名未定');
+			
+			tabs[i] = tab, scenarios[i] = view;
+			
+		}
 		
 		scenariosNodeTabsContainer.append(...tabs),
-		scenariosNodeTabViewsContainer.append(...scenarios);
+		scenariosNodeTabViewsContainer.append(...scenarios),
+		
+		tabs[length - 1].select();
 		
 	}
 	
@@ -150,14 +186,14 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	get container() {
-		
-		return this.shadowRoot?.getElementById?.('container');
-		
-	}
 	get closeButton() {
 		
 		return this.shadowRoot?.getElementById?.('close');
+		
+	}
+	get container() {
+		
+		return this.shadowRoot?.getElementById?.('container');
 		
 	}
 	get createdTime() {
@@ -173,6 +209,16 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 	get createdTimeInput() {
 		
 		return this.shadowRoot?.getElementById?.('created-time');
+		
+	}
+	get createNewEditionButton() {
+		
+		return this.shadowRoot?.getElementById?.('create-new-edition');
+		
+	}
+	get createNextEditionButton() {
+		
+		return this.shadowRoot?.getElementById?.('create-next-edition');
 		
 	}
 	get name() {

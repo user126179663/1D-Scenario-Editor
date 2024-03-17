@@ -14,20 +14,27 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		interactedCreateButton(event) {
 			
 			const { docTabsContainer, docTabViewsContainer } = this,
-					tab = document.createElement('tab-node'),
 					doc = document.createElement('doc-man'),
 					content = document.createElement('span'),
-					editor = document.createElement('editable-element');
+					contentEditor = document.createElement('editable-element'),
+					{ tab, view } = document.createElement('tab-button').impliment('doc', doc, contentEditor),
+					scenariosNode = document.createElement('scenarios-node'),
+					scenarioNode = document.createElement('scenario-node');
 			
-			doc.add(document.createElement('scenarios-node')),
+			scenarioNode.add(null),
+			scenariosNode.add(scenarioNode),
+			
+			doc.add(scenariosNode),
 			
 			content.textContent = doc.name,
 			content.slot = 'editor',
 			
-			editor.appendChild(content),
+			contentEditor.appendChild(content),
 			
 			docTabsContainer.appendChild(tab),
-			docTabViewsContainer.appendChild(tab.set(doc, 'doc', editor));
+			docTabViewsContainer.appendChild(view),
+			
+			tab.select();
 			
 		},
 		

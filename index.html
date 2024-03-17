@@ -22,11 +22,11 @@
 				<header>
 					
 					<io-point>
-						<nav id="menu">
-							<div id="doc-menu">
-								<button id="create" type="button" data-iop-inactivatable>新規作成</button>
+						<nav id="menu" class="io-point-menu spawner to-9">
+							<div id="doc-menu" class="io-point-sub-menu">
+								<button id="create" type="button" data-iop-inactivatable>新規文書作成</button>
 								<div class="hr">🗂️</div>
-								<div id="storage-menu">
+								<div id="storage-menu" class="io-point-sub-menu">
 									<select id="doc-selector"></select>
 									<button id="doc-selector-button" type="button" data-iop-inactivatable>開く</button>
 									<button id="doc-delete-button" type="button" data-iop-inactivatable>削除</button>
@@ -35,11 +35,11 @@
 						</nav>
 					</io-point>
 					
-					<section id="doc-tabs"></section>
+					<section id="doc-tabs" class="tabs-container"></section>
 					
 				</header>
 				
-				<section id="doc-tab-views"></section>
+				<section id="doc-tab-views" class="tab-views-container"></section>
 				
 			</section>
 			
@@ -59,17 +59,25 @@
 						<input id="created-time" type="hidden">
 						<input id="updated-time" type="hidden">
 					</div>
+					<io-point>
+						<nav id="menu" class="io-point-menu spawner to-9">
+							<div id="doc-menu" class="io-point-sub-menu">
+								<button id="create-new-edition" type="button" data-iop-inactivatable>新版作成</button>
+								<button id="create-next-edition" type="button" data-iop-inactivatable>重版作成</button>
+							</div>
+						</nav>
+					</io-point>
 					<div id="ctrl">
 						<button id="save" type="button">保存</button>
 						<!--<button id="close" type="button">閉じる</button>
 						<label for="name">文書名</label>
 						<input id="name" value="">-->
 					</div>
-					<section id="scenarios-node-tabs-container"></section>
+					<section id="scenarios-node-tabs-container" class="tabs-container"></section>
 				</header>
 				
 				
-				<section id="scenarios-node-tab-views-container"></section>
+				<section id="scenarios-node-tab-views-container" class="tab-views-container"></section>
 				
 				<!--<section id="container"></section>-->
 				
@@ -103,9 +111,9 @@
 				<section id="scenarios"></section>
 				<!--<section id="scenarios"></section>-->
 				
-				<section id="ctrl">
+				<!--<section id="ctrl">
 					<button id="add" type="button">📝</button>
-				</section>
+				</section>-->
 				
 			</section>
 			
@@ -137,6 +145,10 @@
 			
 			<div id="root">
 				
+				<section id="ctrl-before">
+					<button id="add-before" type="button">📝</button>
+				</section>
+				
 				<header id="header">
 					<div id="title"><slot name="title"></slot></div>
 					<div id="ctrl">
@@ -147,6 +159,10 @@
 				<section id="body"><slot name="node"></slot></section>
 				
 				<footer id="footer"></footer>
+				
+				<section id="ctrl-after">
+					<button id="add-after" type="button">📝</button>
+				</section>
 				
 			</div>
 			
@@ -177,6 +193,33 @@
 			
 			<link rel="stylesheet" href="css/html-scenario-node-element.css">
 			
+			<section id="root">
+				
+				<header>
+					<io-point>
+						<nav id="menu" class="io-point-menu spawner to-9">
+							<div id="doc-menu" class="io-point-sub-menu">
+								<button id="create-single-line" type="button" data-iop-inactivatable>単行段落作成</button>
+								<button id="create-paragraph" type="button" data-iop-inactivatable>段落作成</button>
+							</div>
+						</nav>
+					</io-point>
+					<section id="scenario-tabs"></section>
+				</header>
+				
+				
+				<section id="scenario"></section>
+				
+				<!--<scenario-controller><span slot="title">タイトル未定</span></scenario-controller>-->
+				
+			</section>
+			
+		</template>
+		
+		<!--<template id="scenario-node">
+			
+			<link rel="stylesheet" href="css/html-scenario-node-element.css">
+			
 			<section>
 				<div id="begin">
 					<scenario-controller>
@@ -204,9 +247,32 @@
 				</div>
 			</section>
 			
-		</template>
+		</template>-->
 		
 		<template id="scenario-controller">
+			
+			<link rel="stylesheet" href="css/html-scenario-controller-element.css">
+			
+			<section id="root">
+				
+				<header>
+					<io-point>
+						<nav id="menu" class="io-point-menu spawner to-9">
+							<div id="doc-menu" class="io-point-sub-menu">
+								<button id="create-single-line" type="button" data-iop-inactivatable>単行段落作成</button>
+								<button id="create-paragraph" type="button" data-iop-inactivatable>段落作成</button>
+							</div>
+						</nav>
+					</io-point>
+				</header>
+				
+				<section id="paragraphs"></section>
+				
+			</section>
+			
+		</template>
+		
+		<!--<template id="scenario-controller">
 			
 			<link rel="stylesheet" href="css/html-scenario-contoller-element.css">
 			
@@ -228,7 +294,7 @@
 				
 			</section>
 			
-		</template>
+		</template>-->
 		
 		<template id="scenario-editor">
 			

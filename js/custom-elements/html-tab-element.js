@@ -11,11 +11,19 @@ export class HTMLTabElement extends HTMLCustomElement {
 		
 		selected: {
 			
+			get: true,
+			
 			observed(name, last, current) {
 				
-				last === current || this[HTMLTabElement[`$${current ? '' : 'de'}selected`]]?.();
+				last === current ||
+					(
+						this[HTMLTabElement[`$${typeof current === 'string' ? '' : 'de'}selected`]]?.(),
+						this.emit('changed-selection', current)
+					);
 				
-			}
+			},
+			
+			set: true
 			
 		}
 		
@@ -25,13 +33,7 @@ export class HTMLTabElement extends HTMLCustomElement {
 		
 		interacted() {
 			
-			if (!this.selected) {
-				
-				for (const tab of this.tabs) tab === this || (tab.selected = false);
-				
-				this.selected = true;
-				
-			}
+			this.selected || this.select();
 			
 		},
 		
@@ -93,32 +95,32 @@ export class HTMLTabElement extends HTMLCustomElement {
 		
 	}
 	
-	set(target, icon, content, group, id) {
-		
-		const	{ icon: presetIcon } = HTMLTabElement,
-				iconNode = icon instanceof Element ? icon : document.createElement('span'),
-				tabButton = document.createElement('tab-button'),
-				view = document.createElement('tab-view');
-		let contentNode;
-		
-		this.tabFor = view.id = ''+(id ?? '') || 'tab-' + crypto.randomUUID(),
-		this.group = group,
-		
-		iconNode.slot = 'icon',
-		typeof icon === 'string' && (iconNode.textContent = presetIcon[Object.hasOwn(presetIcon, icon) ? icon : 'doc']),
-		
-		content instanceof Element ?
-			(contentNode = content) : ((contentNode = document.createElement('span')).textContent = content),
-		contentNode.slot = 'content',
-		
-		tabButton.append(iconNode, contentNode),
-		this.replaceChildren(tabButton),
-		
-		view.appendChild(target);
-		
-		return view;
-		
-	}
+	//set(target, icon, content, group, id) {
+	//	
+	//	const	{ icon: presetIcon } = HTMLTabElement,
+	//			iconNode = icon instanceof Element ? icon : document.createElement('span'),
+	//			tabButton = document.createElement('tab-button'),
+	//			view = document.createElement('tab-view');
+	//	let contentNode;
+	//	
+	//	this.tabFor = view.id = ''+(id ?? '') || 'tab-' + crypto.randomUUID(),
+	//	this.group = group,
+	//	
+	//	iconNode.slot = 'icon',
+	//	typeof icon === 'string' && (iconNode.textContent = presetIcon[Object.hasOwn(presetIcon, icon) ? icon : 'doc']),
+	//	
+	//	content instanceof Element ?
+	//		(contentNode = content) : ((contentNode = document.createElement('span')).textContent = content),
+	//	contentNode.slot = 'content',
+	//	
+	//	tabButton.append(iconNode, contentNode),
+	//	this.replaceChildren(tabButton),
+	//	
+	//	view.appendChild(target);
+	//	
+	//	return view;
+	//	
+	//}
 	
 	toggleSelect(value) {
 		
@@ -213,9 +215,18 @@ HTMLTabViewElement.define();
 
 export class HTMLTabButtonElement extends HTMLCustomShadowElement {
 	
+	static DEFAULT_ICON = 'doc';
+	static icon = { doc: '🖊️' };
+	static rxEmoji = /^(?:<a?:.+?:\d{18}>|\p{Extended_Pictographic})$/gu;
 	static tagName = 'tab-button';
 	
 	static [HTMLCustomElement.$bind] = {
+		
+		changedParentSelection(event) {
+			
+			this.selected = this.parentElement.selected;
+			
+		},
 		
 		interactedCloseButton(event) {
 			
@@ -238,15 +249,110 @@ export class HTMLTabButtonElement extends HTMLCustomShadowElement {
 		super();
 		
 	}
+	connectedCallback() {
+		
+		const { changedParentSelection, parentElement } = this;
+		
+		this.parentElement instanceof HTMLTabElement &&
+			(
+				this.selected = parentElement.selected,
+				this.addListener(parentElement, 'changed-selection', changedParentSelection)
+			);
+		
+	}
+	disconnectedCallback() {
+		
+		const { changedParentSelection, parentElement } = this;
+		
+		this.selected = false,
+		
+		this.parentElement instanceof HTMLTabElement &&
+			this.removeListener(parentElement, 'changed-selection', changedParentSelection);
+		
+	}
+	
+	impliment(group, viewTarget, content, icon, id) {
+		
+		const	{ DEFAULT_ICON, icon: presetIcon, rxEmoji } = HTMLTabButtonElement,
+				iconNode = icon instanceof Element ? icon : document.createElement('span'),
+				tab = document.createElement('tab-node'),
+				view = document.createElement('tab-view');
+		let contentNode;
+		
+		tab.tabFor = view.id = ''+(id ?? '') || 'tab-' + crypto.randomUUID(),
+		tab.group = group,
+		
+		iconNode.slot = 'icon',
+		icon instanceof Element ||
+			(
+				iconNode.textContent = rxEmoji.test(icon) ?
+					icon : presetIcon[Object.hasOwn(presetIcon, icon) ? icon : DEFAULT_ICON]
+			),
+		
+		content instanceof Element ?
+			(contentNode = content) : ((contentNode = document.createElement('span')).textContent = content),
+		contentNode.slot = 'content',
+		
+		this.append(iconNode, contentNode),
+		
+		tab.appendChild(this), view.append(viewTarget);
+		
+		return { tab, view };
+		
+	}
 	
 	get closeButton() {
 		
 		return this.shadowRoot?.getElementById('close');
 		
 	}
+	get selected() {
+		
+		return this.hasAttribute('selected');
+		
+	}
+	set selected(v) {
+		
+		this.toggleAttribute('selected', !!v);
+		
+	}
 	
 }
 HTMLTabButtonElement.define();
+
+//export default class HTMLTabsManagerElement extends HTMLCustomShadowElement {
+//	
+//	static tagName = 'tabs-man';
+//	
+//	static implimentTabs(option, ...contents) {
+//		
+//		typeof option === 'string' && (option = { group: option }),
+//		(option && typeof option === 'object') || (option = {});
+//		
+//		const { group, icon, id, tabContent } = option, { length } = contents, tabs = [], views = [];
+//		let i;
+//		
+//		i = -1;
+//		while (++i < l) {
+//			
+//			const { tab, view } = document.createElement('tab-button').impliment(group, contents[i], tabContent, icon, id);
+//			
+//			tabs[i] = tab, views[i] = view;
+//			
+//		}
+//		
+//		return { tabs, views };
+//		
+//	}
+//	
+//	constructor() {
+//		
+//		super();
+//		
+//	}
+//	
+//}
+
 //export default class HTMLTabsManagerElement extends HTMLCustomShadowElement {
 //	
 //	static SELECTOR_TABS_SLOT = 'slot[name="tabs"]';

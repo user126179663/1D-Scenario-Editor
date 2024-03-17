@@ -22,7 +22,6 @@
 
 #doc-tabs {
 	
-	padding: .4rem;
 	z-index: 2;
 	
 }
@@ -41,30 +40,9 @@ header {
 	
 }
 
-#menu {
-	
-	--menu-width: 12rem;
-	
-	display: flex;
-	flex-direction: column;
-	position: absolute;
-	right: 0;
-	top: var(--size);
-	width: var(--menu-width);
-	writing-mode: horizontal-tb;
-	
-}
-#doc-menu {
-	display: flex;
-	flex-direction: column;
-}
+#doc-menu {}
 
-#storage-menu {
-	
-	display: flex;
-	flex-direction: column;
-	
-}
+#storage-menu {}
 
 #doc-tab-views {
 	
@@ -76,7 +54,7 @@ header {
 	
 }
 
-#doc-tab-views > tab-view {
+#doc-tab-views > tab-view[selected] {
 	
 	display: block;
 	width: 100%;

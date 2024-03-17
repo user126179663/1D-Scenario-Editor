@@ -39,41 +39,70 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	*[Symbol.iterator]() {
+	add(...contents) {
 		
-		const { begin, branch, end } = this;
-		
-		begin && (yield begin);
-		
-		if (branch) for (const v of branch) yield v;
-		
-		end && (yield end);
-		
-	}
-	
-	toJSON() {
-		
-		const	{ begin, branch: branchNodes, end } = this,
-				{ length } = branchNodes,
-				branch = [],
-				json = { begin: begin.toJSON(), branch, end: end.toJSON() };
-		let i;
+		const { isArray } = Array, { container, tabContainer } = this, { length } = contents, tabs = [];
+		let i, content,controller, tab;
 		
 		i = -1;
-		while (++i < length) branch[i] = branchNodes[i].toJSON();
+		while (++i < length) {
+			
+			controller = document.createElement('scenario-controller'),
+			isArray(content = contents[i]) ? controller.add(...content) : controller.add(content);
+			
+			const { tab, view } = document.createElement('tab-button').impliment('scenario', controller, '節');
+			
+			tabs[i] = tab, contents[i] = view;
+			
+		}
 		
-		return json;
+		tabContainer.append(...tabs),
+		container.append(...contents),
+		
+		tabs[tabs.length - 1].select();
 		
 	}
 	
-	get begin() {
+	//*[Symbol.iterator]() {
+	//	
+	//	const { begin, branch, end } = this;
+	//	
+	//	begin && (yield begin);
+	//	
+	//	if (branch) for (const v of branch) yield v;
+	//	
+	//	end && (yield end);
+	//	
+	//}
+	
+	//toJSON() {
+	//	
+	//	const	{ begin, branch: branchNodes, end } = this,
+	//			{ length } = branchNodes,
+	//			branch = [],
+	//			json = { begin: begin.toJSON(), branch, end: end.toJSON() };
+	//	let i;
+	//	
+	//	i = -1;
+	//	while (++i < length) branch[i] = branchNodes[i].toJSON();
+	//	
+	//	return json;
+	//	
+	//}
+	
+	//get begin() {
+	//	
+	//	return this.shadowRoot.getElementById('begin')?.querySelector('scenario-controller');
+	//	
+	//}
+	//get branch() {
+	//	
+	//	return this.shadowRoot.getElementById('branch')?.querySelectorAll('scenario-controller');
+	//	
+	//}
+	get container() {
 		
-		return this.shadowRoot.getElementById('begin')?.querySelector('scenario-controller');
-		
-	}
-	get branch() {
-		
-		return this.shadowRoot.getElementById('branch')?.querySelectorAll('scenario-controller');
+		return this.shadowRoot?.getElementById?.('scenario');
 		
 	}
 	get editor() {
@@ -81,11 +110,16 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		return this.shadowRoot?.getElementById?.('editor');
 		
 	}
-	get end() {
+	get tabContainer() {
 		
-		return this.shadowRoot.getElementById('end')?.querySelector('scenario-controller');
+		return this.shadowRoot?.getElementById?.('scenario-tabs');
 		
 	}
+	//get end() {
+	//	
+	//	return this.shadowRoot.getElementById('end')?.querySelector('scenario-controller');
+	//	
+	//}
 	
 }
 HTMLScenarioNodeElement.define();
