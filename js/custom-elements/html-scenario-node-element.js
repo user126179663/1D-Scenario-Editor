@@ -50,7 +50,7 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 			controller = document.createElement('scenario-controller'),
 			isArray(content = contents[i]) ? controller.add(...content) : controller.add(content);
 			
-			const { tab, view } = document.createElement('tab-button').impliment('scenario', controller, '節');
+			const { tab, view } = document.createElement('tab-button').impliment('scenario', controller, '段落');
 			
 			tabs[i] = tab, contents[i] = view;
 			

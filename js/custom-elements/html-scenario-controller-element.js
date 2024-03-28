@@ -43,6 +43,18 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 			
 		},
 		
+		interactedAddAfterButton(event) {
+			
+			hi(event);
+			
+		},
+		
+		interactedAddBeforeButton(event) {
+			
+			hi(event);
+			
+		},
+		
 		interactedCreateSingleLineButton(event) {
 			
 			this.add({ isLine: true });
@@ -52,6 +64,30 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		interactedCreateParagraphButton(event) {
 			
 			this.add(null);
+			
+		},
+		
+		nodeSlotted(event) {
+			
+			const { detail: slottedNodes } = event, { length } = slottedNodes;
+			let i, node;
+			
+			i = -1;
+			while (++i < length) {
+				
+				switch ((node = slottedNodes[i]).id) {
+					
+					case 'add-after':
+					this.addListener(node, 'click', this.interactedAddAfterButton);
+					break;
+					
+					case 'add-before':
+					this.addListener(node, 'click', this.interactedAddBeforeButton);
+					break;
+					
+				}
+				
+			}
 			
 		}
 		
@@ -67,6 +103,8 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 					editor,
 					interactedCreateSingleLineButton,
 					interactedCreateParagraphButton,
+					nodeSlotted,
+					shadowRoot,
 					subTextEditor
 				} = this;
 		
@@ -74,7 +112,9 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		this.addListener(createParagraphButton, 'click', interactedCreateParagraphButton),
 		
 		this.addListener(editor, 'changed-editable', changedEditable),
-		this.addListener(subTextEditor, 'changed-editable', changedEditableSub);
+		this.addListener(subTextEditor, 'changed-editable', changedEditableSub),
+		
+		this.addListener(shadowRoot, 'node-slotted', nodeSlotted);
 		
 	}
 	
@@ -111,7 +151,8 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 				
 			}
 			
-			(values[i] = document.createElement('node-element')).appendChild(v).slot = 'node';
+			(node = values[i] = document.createElement('node-element')).appendChild(v).slot = 'node',
+			node.appendChild(document.getElementById('scenario-controller-wrapper-parts').content.cloneNode(true));
 			
 		}
 		

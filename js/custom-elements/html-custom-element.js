@@ -557,6 +557,20 @@ export class HTMLCustomElement extends HTMLElement {
 		
 	}
 	
+	// 引数に指定した任意の数の要素が、自身の子か、自身の ShadowDOM 内の子である場合、true を返す。
+	// 指定した要素のひとつでも自身の子でなかった場合 false を返す。
+	isOwnNodes() {
+		
+		const { shadowRoot } = this, { length } = arguments;
+		let i, node;
+		
+		i = -1;
+		while (++i < length && (this.contains(node = arguments[i]) || shadowRoot?.contains?.(node)));
+		
+		return i === length;
+		
+	}
+	
 	jsonalize() {
 		
 		return HTMLCustomElement.jsonalize(this);
@@ -670,8 +684,7 @@ HTMLCustomElement.prototype[HTMLCustomElement.$init] = function () {
 	
 	for (const v of getStaticProperties(this, $init, true, getStaticFunctionsTest)) v.call(this);
 	
-},
-HTMLCustomElement.define();
+};
 
 export default class HTMLCustomShadowElement extends HTMLCustomElement {
 	

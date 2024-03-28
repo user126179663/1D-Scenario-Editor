@@ -1,15 +1,17 @@
-import HTMLCustomShadowElement from './html-custom-element.js';
+//import HTMLCustomShadowElement from './html-custom-element.js';
+import HTMLTabsManagerElement from './html-tab-element.js';
 
-export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
+export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
 	static STORAGE_KEY_PREFIX = 'od-docs@'
 	static tagName = 'doc-man';
+	static defaultScenariosTabOption = { group: 'scenarios', tabContent: '題名未定' };
 	
-	static [HTMLCustomShadowElement.$attribute] = {
+	static [HTMLTabsManagerElement.$attribute] = {
 	};
 	
-	static [HTMLCustomShadowElement.$bind] = {
+	static [HTMLTabsManagerElement.$bind] = {
 		
 		interactedCreateNewEditionButton(event) {
 			
@@ -17,9 +19,9 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 					scenarioNode = document.createElement('scenario-node');
 			
 			scenarioNode.add(null),
-			scenariosNode.add(scenarioNode),
+			scenariosNode.appendScenarioNodes(scenarioNode),
 			
-			this.add(scenariosNode);
+			this.appendScenariosNodes(scenariosNode);
 			
 		},
 		
@@ -98,7 +100,7 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	static [HTMLCustomShadowElement.$init]() {
+	static [HTMLTabsManagerElement.$init]() {
 		
 		const	{
 					closeButton,
@@ -141,28 +143,53 @@ export default class HTMLDocManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	add(...scenarios) {
+	appendScenariosNodes() {
 		
-		const	{ scenariosNodeTabsContainer, scenariosNodeTabViewsContainer } = this,
-				length = scenarios.length,
-				tabs = [];
-		let i;
+		const {
+					constructor: { defaultScenariosTabOption },
+					scenariosNodeTabsContainer,
+					scenariosNodeTabViewsContainer
+				} = this;
 		
-		i = -1;
-		while (++i < length) {
-			
-			const { tab, view } = document.createElement('tab-button').impliment('scenarios', scenarios[i], '題名未定');
-			
-			tabs[i] = tab, scenarios[i] = view;
-			
-		}
-		
-		scenariosNodeTabsContainer.append(...tabs),
-		scenariosNodeTabViewsContainer.append(...scenarios),
-		
-		tabs[length - 1].select();
+		this.appendTabs
+			(scenariosNodeTabsContainer, scenariosNodeTabViewsContainer, defaultScenariosTabOption, ...arguments);
 		
 	}
+	prependScenariosNodes() {
+		
+		const {
+					constructor: { defaultScenariosTabOption },
+					scenariosNodeTabsContainer,
+					scenariosNodeTabViewsContainer
+				} = this;
+		
+		this.prependTabs
+			(scenariosNodeTabsContainer, scenariosNodeTabViewsContainer, defaultScenariosTabOption, ...arguments);
+		
+	}
+	
+	//add(...scenarios) {
+	//	
+	//	const	{ scenariosNodeTabsContainer, scenariosNodeTabViewsContainer } = this,
+	//			length = scenarios.length,
+	//			tabs = [];
+	//	let i;
+	//	
+	//	i = -1;
+	//	while (++i < length) {
+	//		
+	//		const { tab, view } = document.createElement('tab-button').impliment('scenarios', scenarios[i], '題名未定');
+	//		
+	//		tabs[i] = tab, scenarios[i] = view;
+	//		
+	//	}
+	//	
+	//	scenariosNodeTabsContainer.append(...tabs),
+	//	scenariosNodeTabViewsContainer.append(...scenarios),
+	//	
+	//	tabs[length - 1].select();
+	//	
+	//}
 	
 	load(data) {
 		

@@ -10,6 +10,8 @@
 #root {
 	
 	box-sizing: border-box;
+	display: flex;
+	flex-direction: column;
 	height: 100%;
 	padding: 1rem;
 	position: relative;
@@ -23,6 +25,7 @@ header {
 	align-items: center;
 	display: flex;
 	margin: 0 0 0 1rem;
+	position: relative;
 	
 }
 

@@ -106,7 +106,20 @@
 					</img-loader>
 				</header>
 				
-				<section id="scenarios-tabs"></section>
+				<div id="scenarios-tabs-menu">
+					
+					<!--<io-point>
+						<nav id="menu" class="io-point-menu spawner to-9">
+							<div id="doc-menu" class="io-point-sub-menu">
+								<button id="create-new-edition" type="button" data-iop-inactivatable>新しく節を作成</button>
+								<button id="create-next-edition" type="button" data-iop-inactivatable>選択中の節を複製</button>
+							</div>
+						</nav>
+					</io-point>-->
+					
+					<section id="scenarios-tabs"></section>
+					
+				</div>
 				
 				<section id="scenarios"></section>
 				<!--<section id="scenarios"></section>-->
@@ -145,27 +158,57 @@
 			
 			<div id="root">
 				
-				<section id="ctrl-before">
-					<button id="add-before" type="button">📝</button>
-				</section>
-				
-				<header id="header">
-					<div id="title"><slot name="title"></slot></div>
-					<div id="ctrl">
-						<button id="delete" type="button">❌</button>
+				<nav id="nav-before" class="balloon">
+					<div id="nav-before-container" class="balloon-container">
+						<slot name="nav-before"></slot>
 					</div>
-				</header>
+					<!--<button id="add-before" type="button">📝</button>-->
+				</nav>
 				
-				<section id="body"><slot name="node"></slot></section>
+				<div id="content">
+					
+					<nav id="nav-content">
+						<div class="nav-decorator"></div>
+						<div id="nav-content-container" class="balloon-container">
+							<slot name="nav-content"></slot>
+						</div>
+					</nav>
+					
+					<header id="header">
+						<div id="title"><slot name="title"></slot></div>
+					</header>
+					
+					<section id="body"><slot name="node"></slot></section>
+					
+					<footer id="footer"></footer>
+					
+				</div>
 				
-				<footer id="footer"></footer>
-				
-				<section id="ctrl-after">
-					<button id="add-after" type="button">📝</button>
-				</section>
+				<nav id="nav-after" class="balloon">
+					<div id="nav-after-container" class="balloon-container">
+						<slot name="nav-after"></slot>
+					</div>
+					<!--<button id="add-after" type="button">📝</button>-->
+				</nav>
 				
 			</div>
 			
+		</template>
+		
+		<template id="scenario-node-wrapper-parts">
+			<button id="create-new-sec" class="wm-h" type="button" slot="nav-content" data-hint="節を新規作成">✨</button>
+			<button id="duplicate-current-sec" class="wm-h" type="button" slot="nav-content" data-hint="現在の節を複製">🖨</button>
+			<button id="delete-current-sec" class="wm-h" type="button" slot="nav-content" data-hint="現在の節を削除">❌</button>
+			<button id="add-before" class="hint-8 wm-h" type="button" slot="nav-before" data-hint="新しい節を挿入">📝</button>
+			<button id="add-after" class="hint-8 wm-h" type="button" slot="nav-after" data-hint="新しい節を挿入">📝</button>
+		</template>
+		
+		<template id="scenario-controller-wrapper-parts">
+			<button id="create-new-para" class="wm-h" type="button" slot="nav-content" data-hint="段落を新規作成">✨</button>
+			<button id="duplicate-current-para" class="wm-h" type="button" slot="nav-content" data-hint="現在の段落を複製">🖨</button>
+			<button id="delete-current-para" class="wm-h" type="button" slot="nav-content" data-hint="現在の段落を削除">❌</button>
+			<button id="add-before" class="hint-8 wm-h" type="button" slot="nav-before" data-hint="新しい段落を挿入">📝</button>
+			<button id="add-after" class="hint-8 wm-h" type="button" slot="nav-after" data-hint="新しい段落を挿入">📝</button>
 		</template>
 		
 		<!--<template id="node-element">
@@ -196,14 +239,14 @@
 			<section id="root">
 				
 				<header>
-					<io-point>
+					<!--<io-point>
 						<nav id="menu" class="io-point-menu spawner to-9">
 							<div id="doc-menu" class="io-point-sub-menu">
-								<button id="create-single-line" type="button" data-iop-inactivatable>単行段落作成</button>
-								<button id="create-paragraph" type="button" data-iop-inactivatable>段落作成</button>
+								<button id="create-single-line" type="button" data-iop-inactivatable>新しく段落を作成</button>
+								<button id="create-paragraph" type="button" data-iop-inactivatable>選択中の段落を複製</button>
 							</div>
 						</nav>
-					</io-point>
+					</io-point>-->
 					<section id="scenario-tabs"></section>
 				</header>
 				
@@ -255,7 +298,7 @@
 			
 			<section id="root">
 				
-				<header>
+				<!--<header>
 					<io-point>
 						<nav id="menu" class="io-point-menu spawner to-9">
 							<div id="doc-menu" class="io-point-sub-menu">
@@ -264,7 +307,7 @@
 							</div>
 						</nav>
 					</io-point>
-				</header>
+				</header>-->
 				
 				<section id="paragraphs"></section>
 				
@@ -335,9 +378,11 @@
 		<template id="tab-button">
 			<link rel="stylesheet" href="css/html-tab-button-element.css">
 			<section id="root">
-				<div id="content"><div id="icon"><slot name="icon"></slot></div><slot name="content"></slot></div>
-				<div id="ctrl">
-					<button id="close" type="button">❌</button>
+				<div id="body">
+					<div id="content"><div id="icon"><slot name="icon"></slot></div><slot name="content"></slot></div>
+					<div id="ctrl">
+						<button id="close" type="button">❌</button>
+					</div>
 				</div>
 			</section>
 		</template>

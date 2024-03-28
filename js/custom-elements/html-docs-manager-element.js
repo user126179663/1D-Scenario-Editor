@@ -1,40 +1,46 @@
-import HTMLCustomShadowElement from './html-custom-element.js';
+//import HTMLCustomShadowElement from './html-custom-element.js';
+import HTMLTabsManagerElement from './html-tab-element.js';
 
-export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
+export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
 	static STORAGE_KEY_PREFIX = '1dse@';
 	static tagName = 'docs-man';
 	
-	static [HTMLCustomShadowElement.$attribute] = {
+	static [HTMLTabsManagerElement.$attribute] = {
 	};
 	
-	static [HTMLCustomShadowElement.$bind] = {
+	static [HTMLTabsManagerElement.$bind] = {
 		
-		interactedCreateButton(event) {
+		generateTabTarget(target, index, length, tabButton, callee, targets) {
 			
-			const { docTabsContainer, docTabViewsContainer } = this,
-					doc = document.createElement('doc-man'),
-					content = document.createElement('span'),
-					contentEditor = document.createElement('editable-element'),
-					{ tab, view } = document.createElement('tab-button').impliment('doc', doc, contentEditor),
+			const doc = document.createElement('doc-man'),
 					scenariosNode = document.createElement('scenarios-node'),
-					scenarioNode = document.createElement('scenario-node');
+					scenarioNode = document.createElement('scenario-node'),
+					content = document.createElement('span'),
+					contentEditor = document.createElement('editable-element');
 			
 			scenarioNode.add(null),
-			scenariosNode.add(scenarioNode),
+			scenariosNode.appendScenarioNodes(scenarioNode),
 			
-			doc.add(scenariosNode),
+			doc.appendScenariosNodes(scenariosNode),
 			
 			content.textContent = doc.name,
 			content.slot = 'editor',
 			
-			contentEditor.appendChild(content),
+			contentEditor.appendChild(content);
 			
-			docTabsContainer.appendChild(tab),
-			docTabViewsContainer.appendChild(view),
+			return { tabContent: contentEditor, group: 'doc', target: doc };
 			
-			tab.select();
+		},
+		
+		interactedCreateButton(event) {
+			
+			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
+			
+			this.appendTabs(docTabsContainer, docTabViewsContainer, generateTabTarget, 1),
+			
+			docTabsContainer.lastElementChild?.select?.();
 			
 		},
 		
@@ -45,7 +51,7 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 					{ docs } = data,
 					{ docSelector } = this;
 			
-			this.container.replaceChildren(...HTMLCustomShadowElement.nodify(JSON.parse(docs[docSelector.selectedIndex])));
+			this.container.replaceChildren(...HTMLTabsManagerElement.nodify(JSON.parse(docs[docSelector.selectedIndex])));
 			
 		},
 		
@@ -64,7 +70,7 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 						{ length } = docs;
 				
 				(data.docs = docs)[index < length ? index : length] =
-					{ uid, doc: JSON.stringify(HTMLCustomShadowElement.jsonalize(doc)) },
+					{ uid, doc: JSON.stringify(HTMLTabsManagerElement.jsonalize(doc)) },
 				
 				/*setStorage(id, data)*/true && doc.bubble('saved', this, true);
 				
@@ -177,7 +183,7 @@ export default class HTMLDocsManagerElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	static [HTMLCustomShadowElement.$init]() {
+	static [HTMLTabsManagerElement.$init]() {
 		
 		const	{
 					createButton,

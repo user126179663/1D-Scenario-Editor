@@ -1,7 +1,174 @@
 @import url("common.css");
 
+#root {
+	
+	box-sizing: border-box;
+	padding: 0 2rem;
+	position: relative;
+	
+}
+
 #header {
 	
 	display: flex;
+	
+}
+
+#content {
+	
+	position: relative;
+	
+}
+
+#nav-content {
+	
+	--height: 1rem;
+	
+	align-items: start;
+	display: flex;
+	height: var(--height);
+	justify-content: center;
+	left: 0;
+	position: absolute;
+	top: calc(var(--height) * -1);
+	width: 100%;
+	writing-mode: horizontal-tb;
+	z-index: 3;
+	
+}
+#nav-content:hover {
+	
+	z-index: 4;
+	
+}
+#root:not(:hover) #nav-content {
+	
+	display: none;
+	
+}
+
+.nav-decorator {
+	
+	--height: .5rem;
+	
+	animation: nav-in .2s ease 0s 1 normal forwards running;
+	border: 1px dotted rgba(80,80,80,1);
+	border-width: 1px 1px 0;
+	height: var(--height);
+	position: absolute;
+	transition: transform .2s ease 0s;
+	transform: translate(0%, 0%);
+	width: 100%;
+	
+}
+@keyframes nav-in {
+	from { opacity: 0; translate: 0% 20%; }
+	to { opacity: 1; translate: 0% 0%; }
+}
+#nav-content:hover .nav-decorator {
+	
+	border-color: rgba(160,160,160,1);
+	border-style: solid;
+	border-width: 2px 1px 0;
+	transform: translate(0%, -100%);
+	
+}
+#nav-content #nav-content-container {
+	
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	width: fit-content;
+	
+}
+#nav-content:not(:hover) #nav-content-container, #nav-content-container:not(:hover) {
+	
+	display: none;
+	
+}
+#nav-content:hover #nav-content-container * {
+	
+	animation: pop .2s cubic-bezier(.45,.17,.31,1.29) 0s 1 normal forwards running;
+	display: flex;
+	
+}
+
+.balloon {
+	
+	--size: .5rem;
+	
+	align-items: center;
+	display: flex;
+	justify-content: center;
+	
+	transform: translate(50%, 0);
+	
+}
+.balloon::before {
+	
+	--size: .8rem;
+	
+	border: 3px solid rgba(160,160,160,1);
+	border-width: 3px 0 0 3px;
+	content: "";
+	display: block;
+	height: var(--size);
+	position: absolute;
+	rotate: 45deg;
+	width: var(--size);
+	transition: translate .2s ease 0s;
+	
+}
+.balloon:hover {
+	
+	z-index: 4;
+	
+}
+.balloon:hover::before {
+	
+	translate: 0% 150%;
+	
+}
+.balloon:not(:hover) * {
+	
+	display: none;
+	
+}
+.balloon .balloon-container {
+	
+	position: absolute;
+	writing-mode: horizontal-tb;
+	
+}
+.balloon:hover .balloon-container {
+	
+	animation: pop .2s cubic-bezier(.45,.17,.31,1.29) 0s 1 normal forwards running;
+	display: flex;
+	
+}
+@keyframes pop {
+	
+	from { transform: scale(0); }
+	to { transform: scale(1); }
+	
+}
+
+#content {
+}
+
+#nav-before.balloon {
+	
+	right: 0;
+	
+}
+#nav-after.balloon {
+	
+	left: 0;
+	
+}
+
+.balloon ::slotted(*) {
+	
+	margin-bottom: 1rem !important;
 	
 }
