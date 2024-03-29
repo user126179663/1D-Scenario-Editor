@@ -79,28 +79,6 @@ export default class HTMLAssignableElement extends HTMLCustomShadowElement {
 																(last.has(targetSlot) ? last : (last.set(targetSlot, []))).get(targetSlot)
 															);
 			
-			//const	{ $assignedNodesOption, $last, $slot } = HTMLAssignableElement,
-			//		assigned = targetSlot.assignedNodes(HTMLAssignableElement[$assignedNodesOption]),
-			//		last = this[$last],
-			//		lastAssigned = (last.has(target) ? last : (last.set(target, []))).get(target),
-			//		slotted = [];
-			//let i,l,i0, v;
-			//
-			//i = i0 = -1, l = assigned.length;
-			//while (++i < l) lastAssigned.indexOf(v = assigned[i]) === -1 && (slotted[++i0] = v);
-			//
-			//i = -1, l = lastAssigned.length;
-			//while (++i < l) assigned.indexOf(lastAssigned[i]) === -1 && (lastAssigned.splice(i--, 1), --l);
-			//
-			//if (++i0) {
-			//	
-			//	i = -1;
-			//	while (++i < i0) lastAssigned[l++] = slotted[i];
-			//	
-			//}
-			//
-			//return slotted;
-			
 		}
 		
 	}
@@ -179,61 +157,5 @@ HTMLAssignableElement[HTMLAssignableElement.$handler] = function (event) {
 		}
 		
 	}
-	
-	//for (k in slot) {
-	//	
-	//	if (target.matches(k) && (v = slot[k])) {
-	//		
-	//		switch (typeof v) {
-	//			
-	//			case 'function':
-	//			i = -1;
-	//			while (++i < length) v.call(this, event, assigned[i], assigned);
-	//			break;
-	//			
-	//			case 'object':
-	//			i = -1;
-	//			while (++i < length) {
-	//				
-	//				for (k in v) {
-	//					
-	//					if ((node = assigned[i]).matches(k)) {
-	//						
-	//						if (isArray(handler = v[k])) {
-	//							
-	//							i0 = -1, l0 = handler.length;
-	//							while (++i0 < l0) handler[i0]?.call?.(this, event, node, assigned);
-	//							
-	//						} else handler?.call?.(this, event, node, assigned);
-	//						
-	//					}
-	//					
-	//				}
-	//				
-	//			}
-	//			break;
-	//			
-	//		}
-	//		
-	//	}
-	//	
-	//	//for (k in slotted) {
-	//	//	
-	//	//	if ((v = current[i]).matches(k)) {
-	//	//		
-	//	//		if (isArray(v0 = slotted[k])) {
-	//	//			
-	//	//			i0 = -1, l0 = v0.length;
-	//	//			while (++i0 < l0) v0[i0]?.call?.(this, event, v, current);
-	//	//			
-	//	//		} else v0?.call?.(this, event, v, current);
-	//	//		
-	//	//	}
-	//	//	
-	//	//	(v = current[i]).matches(k) && slotted[k]?.call?.(this, event, v, current);
-	//	//	
-	//	//}
-	//	
-	//}
 	
 };

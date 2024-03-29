@@ -18,9 +18,11 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 					scenariosNode = document.createElement('scenarios-node'),
 					scenarioNode = document.createElement('scenario-node'),
 					content = document.createElement('span'),
-					contentEditor = document.createElement('editable-element');
+					contentEditor = document.createElement('editable-element'),
+					scenarioController = document.createElement('scenario-controller');
 			
-			scenarioNode.add(null),
+			scenarioController.add(null),
+			scenarioNode.add(scenarioController),
 			scenariosNode.appendScenarioNodes(scenarioNode),
 			
 			doc.appendScenariosNodes(scenariosNode),

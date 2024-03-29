@@ -1,10 +1,10 @@
-import HTMLCustomShadowElement from './html-custom-element.js';
+import HTMLTabsManagerElement from './html-tab-element.js';
 
-export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
+export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 	
 	static tagName = 'scenario-node';
 	
-	static [HTMLCustomShadowElement.$attribute] = {
+	static [HTMLTabsManagerElement.$attribute] = {
 		
 		editing: {
 			
@@ -21,13 +21,40 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		
 	};
 	
-	static [HTMLCustomShadowElement.$bind] = {
+	static [HTMLTabsManagerElement.$bind] = {
 		
-		
+		generateTabTarget(target, index, length, tabButton, callee, targets) {
+			
+			const	content = document.createElement('span'),
+					contentEditor = document.createElement('editable-element');
+			
+			content.textContent = '段落',
+			content.slot = 'editor',
+			
+			contentEditor.appendChild(content);
+			
+			return { group: 'scenario', tabContent: contentEditor, target };
+			
+		}
 		
 	};
 	
-	static [HTMLCustomShadowElement.$init]() {
+	static wrapScenarioNode(scenarioNode) {
+		/*
+			<button id="create-new-edition" type="button" data-iop-inactivatable>新しく節を作成</button>
+			<button id="create-next-edition" type="button" data-iop-inactivatable>選択中の節を複製</button>
+		*/
+		const wrapper = document.createElement('node-element');
+		
+		scenarioNode.slot = 'node',
+		
+		wrapper.append(scenarioNode, document.getElementById('scenario-node-wrapper-parts').content.cloneNode(true));
+		
+		return wrapper;
+		
+	}
+	
+	static [HTMLTabsManagerElement.$init]() {
 		
 		
 		
@@ -39,7 +66,45 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	add(...contents) {
+	add() {
+		
+		const { container, generateTabTarget, tabContainer } = this;
+		
+		this.appendTabs(tabContainer, container, generateTabTarget, ...arguments);
+		
+		//return;
+		//
+		//const { isArray } = Array, { container, tabContainer } = this, { length } = contents, tabs = [];
+		//let i, content,controller, tab;
+		//
+		//i = -1;
+		//while (++i < length) {
+		//	
+		//	controller = document.createElement('scenario-controller'),
+		//	isArray(content = contents[i]) ? controller.add(...content) : controller.add(content);
+		//	
+		//	const	span = document.createElement('span'),
+		//			contentEditor = document.createElement('editable-element');
+		//	
+		//	span.textContent = '段落',
+		//	span.slot = 'editor',
+		//	
+		//	contentEditor.appendChild(span);
+		//	
+		//	const { tab, view } = document.createElement('tab-button').impliment('scenario', controller, contentEditor);
+		//	
+		//	tabs[i] = tab, contents[i] = view;
+		//	
+		//}
+		//
+		//tabContainer.append(...tabs),
+		//container.append(...contents),
+		//
+		//tabs[tabs.length - 1].select();
+		
+	}
+	
+	_add(...contents) {
 		
 		const { isArray } = Array, { container, tabContainer } = this, { length } = contents, tabs = [];
 		let i, content,controller, tab;
@@ -63,43 +128,6 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		
 	}
 	
-	//*[Symbol.iterator]() {
-	//	
-	//	const { begin, branch, end } = this;
-	//	
-	//	begin && (yield begin);
-	//	
-	//	if (branch) for (const v of branch) yield v;
-	//	
-	//	end && (yield end);
-	//	
-	//}
-	
-	//toJSON() {
-	//	
-	//	const	{ begin, branch: branchNodes, end } = this,
-	//			{ length } = branchNodes,
-	//			branch = [],
-	//			json = { begin: begin.toJSON(), branch, end: end.toJSON() };
-	//	let i;
-	//	
-	//	i = -1;
-	//	while (++i < length) branch[i] = branchNodes[i].toJSON();
-	//	
-	//	return json;
-	//	
-	//}
-	
-	//get begin() {
-	//	
-	//	return this.shadowRoot.getElementById('begin')?.querySelector('scenario-controller');
-	//	
-	//}
-	//get branch() {
-	//	
-	//	return this.shadowRoot.getElementById('branch')?.querySelectorAll('scenario-controller');
-	//	
-	//}
 	get container() {
 		
 		return this.shadowRoot?.getElementById?.('scenario');
@@ -115,11 +143,6 @@ export default class HTMLScenarioNodeElement extends HTMLCustomShadowElement {
 		return this.shadowRoot?.getElementById?.('scenario-tabs');
 		
 	}
-	//get end() {
-	//	
-	//	return this.shadowRoot.getElementById('end')?.querySelector('scenario-controller');
-	//	
-	//}
 	
 }
 HTMLScenarioNodeElement.define();

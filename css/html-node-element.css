@@ -78,6 +78,7 @@
 	align-items: center;
 	display: flex;
 	justify-content: center;
+	min-width: 100%;
 	width: fit-content;
 	
 }

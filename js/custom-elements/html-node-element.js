@@ -40,7 +40,7 @@ export default class HTMLNodeElement extends HTMLAssignableElement {
 	static [HTMLAssignableElement.$slot] = {
 		
 		slot(event, target, isDischarged, changed) {
-			hi();
+			
 			this.bubble(HTMLNodeElement.EVENT_TYPE_NODE_SLOTTED, { isDischarged, node: this, target });
 			
 		}

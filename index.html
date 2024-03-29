@@ -379,12 +379,21 @@
 			<link rel="stylesheet" href="css/html-tab-button-element.css">
 			<section id="root">
 				<div id="body">
-					<div id="content"><div id="icon"><slot name="icon"></slot></div><slot name="content"></slot></div>
-					<div id="ctrl">
-						<button id="close" type="button">❌</button>
+					<div id="node">
+						<div id="ctrl-before" class="ctrl">
+							<slot name="ctrl-before"></slot>
+						</div>
+						<div id="content"><div id="icon"><slot name="icon"></slot></div><slot name="content"></slot></div>
+						<div id="ctrl-after" class="ctrl">
+							<slot name="ctrl-after"></slot>
+						</div>
 					</div>
 				</div>
 			</section>
+		</template>
+		
+		<template id="tab-button-ctrl-parts">
+			<button id="close" slot="ctrl-before" type="button">❌</button>
 		</template>
 		
 	</body>

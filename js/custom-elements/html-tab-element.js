@@ -57,34 +57,9 @@ export class HTMLTabElement extends HTMLCustomElement {
 		const { interacted, onCloseTab } = this;
 		
 		this.addListener(this, 'click', interacted),
-		this.addListener(this, 'closed-tab', onCloseTab);
+		this.addListener(this, 'tab-close', onCloseTab);
 		
 	}
-	
-	//static create(target, content, group, id = crypto.randomUUID()) {
-	//	
-	//	const	created = new DocumentFragment(),
-	//			tab = document.createElement('tab-node'),
-	//			tabButton = document.createElement('tab-button'),
-	//			view = document.createElement('tab-view');
-	//	let contentNode;
-	//	
-	//	tab.tabFor = view.id = id,
-	//	tab.group = group,
-	//	
-	//	content instanceof Element ?
-	//		(contentNode = content) : ((contentNode = document.createElement('span')).textContent = content),
-	//	
-	//	tabButton.appendChild(contentNode).slot = 'content',
-	//	tab.appendChild(tabButton),
-	//	
-	//	view.appendChild(target),
-	//	
-	//	created.append(tab, view);
-	//	
-	//	return created;
-	//	
-	//}
 	
 	constructor() {
 		
@@ -99,33 +74,6 @@ export class HTMLTabElement extends HTMLCustomElement {
 		this.selected = true;
 		
 	}
-	
-	//set(target, icon, content, group, id) {
-	//	
-	//	const	{ icon: presetIcon } = HTMLTabElement,
-	//			iconNode = icon instanceof Element ? icon : document.createElement('span'),
-	//			tabButton = document.createElement('tab-button'),
-	//			view = document.createElement('tab-view');
-	//	let contentNode;
-	//	
-	//	this.tabFor = view.id = ''+(id ?? '') || 'tab-' + crypto.randomUUID(),
-	//	this.group = group,
-	//	
-	//	iconNode.slot = 'icon',
-	//	typeof icon === 'string' && (iconNode.textContent = presetIcon[Object.hasOwn(presetIcon, icon) ? icon : 'doc']),
-	//	
-	//	content instanceof Element ?
-	//		(contentNode = content) : ((contentNode = document.createElement('span')).textContent = content),
-	//	contentNode.slot = 'content',
-	//	
-	//	tabButton.append(iconNode, contentNode),
-	//	this.replaceChildren(tabButton),
-	//	
-	//	view.appendChild(target);
-	//	
-	//	return view;
-	//	
-	//}
 	
 	toggleSelect(value) {
 		
@@ -218,7 +166,7 @@ export class HTMLTabViewElement extends HTMLCustomElement {
 }
 HTMLTabViewElement.define();
 
-export class HTMLTabButtonElement extends HTMLCustomShadowElement {
+export class HTMLTabButtonElement extends HTMLShadowListenerElement {
 	
 	static DEFAULT_ICON = 'doc';
 	static icon = { doc: '🖊️' };
@@ -243,9 +191,15 @@ export class HTMLTabButtonElement extends HTMLCustomShadowElement {
 	
 	static [HTMLCustomElement.$init]() {
 		
-		const { closeButton, interactedCloseButton } = this;
+	}
+	
+	static [HTMLShadowListenerElement.$slot] = {
 		
-		this.addListener(closeButton, 'click', interactedCloseButton);
+		['.ctrl slot[name^="ctrl-"]'](event, target, isDischarged, changed) {
+			
+			this.addListener(target, 'click', this.interactedCloseButton);
+			
+		}
 		
 	}
 	
@@ -349,7 +303,9 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		const length = typeof targets[0] === 'number' ? targets.splice(0,1)[0] : targets.length,
 				tabs = [],
 				views = [],
-				isObjectOption = typeof option === 'object';
+				isObjectOption = typeof option === 'object',
+				ctrlParts = document.getElementById('tab-button-ctrl-parts');
+		
 		let i, tabButton;
 		
 		if (isObjectOption) {
@@ -361,7 +317,9 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		i = -1;
 		while (++i < length) {
 			
-			tabButton = document.createElement('tab-button');
+			tabButton = document.createElement('tab-button'),
+			
+			ctrlParts && tabButton.append(ctrlParts.content.cloneNode(true));
 			
 			if (isObjectOption) {
 				
@@ -444,7 +402,7 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		this[HTMLTabsManagerElement.$selectionHistory] = {},
 		
 		this.addListener(shadowRoot, 'changed-selection', changedTabSelection),
-		this.addListener(this, 'closed-tab', tabClosed);
+		this.addListener(this, 'tab-close', tabClosed);
 		
 	}
 	
@@ -485,111 +443,3 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 	}
 	
 }
-
-//export default class HTMLTabsManagerElement extends HTMLCustomShadowElement {
-//	
-//	static SELECTOR_TABS_SLOT = 'slot[name="tabs"]';
-//	static SELECTOR_VIEWS_SLOT = 'slot[name="tab-views"]';
-//	static assignedNodesOption = { flatten: true };
-//	static tagName = 'tabs-man';
-//	
-//	[HTMLCustomShadowElement.$bind] = {
-//		
-//		interactedViewsSlot(event) {
-//			
-//			const { tabsSlot } = this;
-//			let slotted;
-//			
-//			slotted = event.target;
-//			while (slotted?.assignedSlot !== tabsSlot && (slotted = slotted.parentElement));
-//			
-//			if (slotted) {
-//				
-//				const { tabViews } = this, { dataset: { tabFor } } = slotted, length = tabViews.length;
-//				let i, view;
-//				
-//				i = -1;
-//				while (++i < length && (view = tabViews[i]).dataset.viewId !== tabFor);
-//				
-//				if (i !== length) {
-//					
-//					const	{ tabs } = this, tabsLength = tabs.length;
-//					
-//					i = -1;
-//					while (++i < tabsLength) delete tabs[i].dataset.tabSelected;
-//					
-//					i = -1;
-//					while (++i < length) delete tabViews[i].dataset.viewSelected;
-//					
-//					tab.dataset.tabSelected = view.dataset.viewSelected = '';
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//	};
-//	
-//	static [HTMLCustomShadowElement.$init]() {
-//		
-//		const { interactedViewsSlot, shadowRoot, tabsSlot, tabViewsSlot } = this;
-//		
-//		this.addListener(shadowRoot, 'click', interactedViewsSlot);
-//		
-//	}
-//	
-//	constructor() {
-//		
-//		super();
-//		
-//	}
-//	
-//	addTab(view, tab) {
-//		
-//		if (view instanceof Element) {
-//			
-//			if (!(tab instanceof Element)) {
-//				
-//				const title = document.createElement('span');
-//				
-//				title.textContent = 'sample',
-//				title.slot = 'title',
-//				
-//				(tab = document.createElement('node-element')).appendChild(title);
-//				
-//			}
-//			
-//			tab.dataset.tabFor = view.dataset.viewId ||= crypto.randomUUID(),
-//			
-//			tab.slot = 'tabs', view.slot = 'tab-views';
-//			
-//			this.append(tab, view);
-//			
-//		}
-//		
-//	}
-//	
-//	get tabs() {
-//		
-//		return this.tabsSlot?.assignedNodes?.(HTMLTabsManagerElement.assignedNodesOption) ?? [];
-//		
-//	}
-//	get tabsSlot() {
-//		
-//		return this.shadowRoot.querySelector(HTMLTabsManagerElement.SELECTOR_TABS_SLOT);
-//		
-//	}
-//	get tabViews() {
-//		
-//		return this.tabViewsSlot?.assignedNodes?.(HTMLTabsManagerElement.assignedNodesOption) ?? [];
-//		
-//	}
-//	get tabViewsSlot() {
-//		
-//		return this.shadowRoot.querySelector(HTMLTabsManagerElement.SELECTOR_VIEWS_SLOT);
-//		
-//	}
-//	
-//}
-//HTMLTabsManagerElement.define();

@@ -1,9 +1,14 @@
 import HTMLAssignableElement from './html-assignable-element.js';
 
-// <node-element> のイベント node-slotted によって通知されたスロットされた要素に、任意のコールバック関数を実行する。
-// 設計思想と実装は HTMLAssignableElement とほぼ同じ。
-// 任意の要素を取り得る <node-element> のイベントリスナーの登録状況を文字列化された DOM の HTML から再現することを目的としている。
-// このオブジェクトの仕様に基づいてプラグインなどの拡張機能を作ることで、その適応を自動化させる。
+// インスタンスのコンストラクターに設定された HTMLShadowListenerElement.$event に基づき、
+// EventTarget を継承する任意のオブジェクト上の任意のイベントに対し任意のコールバック関数を実行する。
+// 実際のところ、任意のイベントを聴取できるのは汎用化のためだけで、その機能を通じて、
+// この要素が子要素に持つ <node-element> のイベント node-slotted を聴取することを目的としている。
+// これにより、任意の操作によって拡張された <node-element> の変化を、このインスタンス上に反映させることができる。
+// より正確に言えば、そうした拡張および反映のための処理を独自に実装することができる。
+// なお、所定のメソッドを通じて HTMLShadowListenerElement.$event に変化を加えると、
+// ページ上の document でイベント updated-shadow-listener が発生する。
+// このイベントは内部処理のために使うことを想定しているため、基本的には意識する必要はない。
 
 export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 	
@@ -12,12 +17,10 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 	static $updated = Symbol('HTMLShadowListenerElement.updated');
 	static EVENT_TYPE_UPDATED = 'updated-shadow-listener';
 	
-	//static rxShadowRoot = /^\s*?(?:!|#|shadow|shadowroot)\s*$/i;
-	
 	static [HTMLAssignableElement.$init]() {
 		
 		const	{ isArray } = Array,
-				{ $event, $handler, rxShadowRoot } = HTMLShadowListenerElement,
+				{ $event, $handler, wrapArray } = HTMLShadowListenerElement,
 				{ constructor, shadowRoot } = this,
 				descriptor = constructor[$event],
 				handler = this[$handler] ??= HTMLShadowListenerElement[$handler].bind(this),
@@ -30,7 +33,7 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 			
 			for (k in descriptor) {
 				
-				i = -1, l = (listeners = descriptor[k]).length;
+				i = -1, l = (listeners = descriptor[k] = wrapArray(descriptor[k])).length;
 				while (++i < l) {
 					
 					const { option, targets: currentTargets } = listeners[i];
@@ -62,45 +65,6 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 		
 	}
 	
-	//static addShadowListener(descriptor) {
-	//	
-	//	if (descriptor && typeof descriptor === 'object') {
-	//		
-	//		for (k in descriptor) {
-	//			
-	//			i = -1, l = (listeners = descriptor[k]).length;
-	//			while (++i < l) {
-	//				
-	//				const { includesShadowRoot, option, targets: currentTargets, type } = listeners[i];
-	//				
-	//				isArray(currentTargets) ? targets.push(...currentTargets) : (targets[0] = currentTargets),
-	//				
-	//				i0 = -1, l0 = targets.length;
-	//				while (++i0 < l0) {
-	//					
-	//					if ((target = targets[i0])) {
-	//						
-	//						target === true ?	targets[i0] = shadowRoot :
-	//							typeof target === 'string' ?	targets.splice(i0, 1, shadowRoot.querySelectorAll(target)) :
-	//																	targets.splice(i0, 1, target);
-	//						
-	//					} else targets.splice(i0, 1);
-	//					
-	//				}
-	//				
-	//				i0 = -1, l0 = targets.length;
-	//				while (++i0 < l0) this.addListener(targets[i0], k, handler, option, $event);
-	//				
-	//				targets.length = 0;
-	//				
-	//			}
-	//			
-	//		}
-	//		
-	//	}
-	//	
-	//}
-	
 	static addDescriptor(descriptor) {
 		
 		if (descriptor && typeof descriptor === 'object') {
@@ -113,7 +77,7 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 			for (k in descriptor) {
 				
 				i = -1,
-				l = (listeners = wrapArray(descriptor[k])).length,
+				l = (listeners = descriptor[k] = wrapArray(descriptor[k])).length,
 				l0 = (addedListeners = event[k] = wrapArray(event[k] ?? [])).length;
 				while (++i < l) {
 					
@@ -201,7 +165,7 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 				if (hasOwn(event, k)) {
 					
 					i = -1,
-					l = (listeners = wrapArray(descriptor[k])).length,
+					l = (listeners = descriptor[k] = wrapArray(descriptor[k])).length,
 					l0 = (addedListeners = event[k] = wrapArray(event[k] ?? [])).length;
 					while (++i < l) {
 						
@@ -259,7 +223,7 @@ HTMLShadowListenerElement[HTMLShadowListenerElement.$updated] = function (event)
 HTMLShadowListenerElement[HTMLShadowListenerElement.$handler] = function (event) {
 	
 	const	{ isArray } = Array,
-			{ $event } = HTMLShadowListenerElement,
+			{ $event, wrapArray } = HTMLShadowListenerElement,
 			{ shadowRoot } = this,
 			{ target, type } = event,
 			composedPath = event.composedPath(),
@@ -274,7 +238,7 @@ HTMLShadowListenerElement[HTMLShadowListenerElement.$handler] = function (event)
 		
 		if (type === k) {
 			
-			i = -1, l = (listeners = descriptor[k]).length;
+			i = -1, l = (listeners = descriptor[k] = wrapArray(descriptor[k])).length;
 			while (++i < l) {
 				
 				const { targets: currentTargets } = (listener = listeners[i]);
@@ -326,164 +290,3 @@ HTMLShadowListenerElement[HTMLShadowListenerElement.$handler] = function (event)
 	}
 	
 };
-
-//export default class HTMLNodeReceiverElement extends HTMLAssignableElement {
-//	
-//	static $receiver = Symbol('HTMLNodeReceiverElement.receiver');
-//	
-//	static receiverHandler(event) {
-//		
-//		const	{ isArray } = Array,
-//				{ $receiver } = HTMLNodeReceiverElement,
-//				receiver = HTMLNodeReceiverElement[$receiver],
-//				{ detail: { isDischarged, node, target } } = event;
-//		let i,l,k, handler;
-//		
-//		for (k in receiver) {
-//			
-//			if (slotted.matches(k)) {
-//				
-//				if (typeof (handler = receiver[k]) === 'function') {
-//					
-//					handler.call(this, event, target, isDischarged, node);
-//					
-//				} else if (isArray(handler)) {
-//					
-//					i = -1, l = handler.length;
-//					while (++i < l) handler[i]?.call?.(this, event, target, isDischarged, node);
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//	}
-//	
-//	static [HTMLAssignableElement.$init]() {
-//		
-//		const { $receiver } = HTMLNodeReceiverElement;
-//		
-//		this.abort($receiver),
-//		
-//		this.addListener(this.shadowRoot, HTMLNodeElement.SLOT_EVENT_TYPE, this[$receiver], undefined, $receiver);
-//		
-//	}
-//	
-//	constructor() {
-//		
-//		super();
-//		
-//		const { $receiver, receiverHandler } = HTMLNodeReceiverElement;
-//		
-//		this[$receiver] = receiverHandler.bind(this);
-//		
-//	}
-//	
-//}
-// Sample
-//HTMLNodeReceiverElement[HTMLNodeReceiverElement.$receiver] = {
-//	'#sample-0': [
-//		function () { ... }
-//	],
-//	
-//	['sample-1']() {
-//	}
-//	
-//};
-
-//export default class HTMLNodeReceiverElement extends HTMLAssignableElement {
-//	
-//	static $receiver = Symbol('HTMLNodeReceiverElement.receiver');
-//	
-//	static receiverHandler(event) {
-//		
-//		const	{ isArray } = Array,
-//				{ $receiver } = HTMLNodeReceiverElement,
-//				receiver = HTMLNodeReceiverElement[$receiver],
-//				{ detail: { node, slotted } } = event;
-//		let i,l, k,k0, v, handler;
-//		
-//		for (k in receiver) {
-//			
-//			if (node.matches(k) && (handler = receiver[k])) {
-//				
-//				switch (typeof handler) {
-//					
-//					case 'function':
-//					handler.call(this, event, slotted);
-//					break;
-//					
-//					case 'object':
-//					for (k0 in handler) {
-//						
-//						if (slotted.matches(k0)) {
-//							
-//							if (isArray(v = handler[k0])) {
-//								
-//								i = -1, l = v.length;
-//								while (++i < l) v[i]?.call?.(this, event, slotted);
-//								
-//							} else v?.call?.(this, event, slotted)
-//							
-//						}
-//						
-//					}
-//					break;
-//					
-//				}
-//				
-//			}
-//			
-//		}
-//		
-//	}
-//	
-//	static [HTMLAssignableElement.$init]() {
-//		
-//		const	{ isArray } = Array,
-//				{ SLOT_EVENT_TYPE } = HTMLNodeElement,
-//				{ $receiver } = HTMLNodeReceiverElement,
-//				receiver = HTMLNodeReceiverElement[$receiver],
-//				{ shadowRoot } = this,
-//				handler = this[$receiver];
-//		let i,l,k, nodes,node;
-//		
-//		this.abort($receiver);
-//		
-//		for (k in receiver) {
-//			
-//			i = -1, l = (nodes = shadowRoot.querySelectorAll(k)).length;
-//			while (++i < l)	(node = nodes[i]).tagName === 'NODE-ELEMENT' &&
-//										this.addListener(node, SLOT_EVENT_TYPE, handler, undefined, $receiver);
-//			
-//		}
-//		
-//	}
-//	
-//	constructor() {
-//		
-//		super();
-//		
-//		const { $receiver, receiverHandler } = HTMLNodeReceiverElement;
-//		
-//		this[$receiver] = receiverHandler.bind(this);
-//		
-//	}
-//	
-//}
-// Sample
-//HTMLNodeReceiverElement[HTMLNodeReceiverElement.$receiver] = {
-//	
-//	'#sample': {
-//		
-//		'#sample-0': [
-//			function () { ... }
-//		],
-//		
-//		['sample-1']() {
-//		}
-//		
-//	}
-//	
-//};

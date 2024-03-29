@@ -1,11 +1,11 @@
-import HTMLCustomShadowElement from './html-custom-element.js';
+import HTMLShadowListenerElement from './html-shadow-listener-element.js';
 
-export default class HTMLScenarioControllerElement extends HTMLCustomShadowElement {
+export default class HTMLScenarioControllerElement extends HTMLShadowListenerElement {
 	
 	static assignedNodesOption = { flatten: true };
 	static tagName = 'scenario-controller';
 	
-	static [HTMLCustomShadowElement.$attribute] = {
+	static [HTMLShadowListenerElement.$attribute] = {
 		
 		editable: {
 			
@@ -29,7 +29,7 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 	};
 	
-	static [HTMLCustomShadowElement.$bind] = {
+	static [HTMLShadowListenerElement.$bind] = {
 		
 		changedEditable(event) {
 			
@@ -45,13 +45,13 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 		interactedAddAfterButton(event) {
 			
-			hi(event);
+			this.insertEditorsAfter(event.composedPath()[0].assignedSlot.getRootNode().host, null);
 			
 		},
 		
 		interactedAddBeforeButton(event) {
 			
-			hi(event);
+			this.insertEditorsBefore(event.composedPath()[0].assignedSlot.getRootNode().host, null);
 			
 		},
 		
@@ -65,24 +65,29 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 			
 			this.add(null);
 			
-		},
+		}
 		
-		nodeSlotted(event) {
+	};
+	
+	static [HTMLShadowListenerElement.$event] = {
+		
+		'node-slotted': {
 			
-			const { detail: slottedNodes } = event, { length } = slottedNodes;
-			let i, node;
+			targets: true,
 			
-			i = -1;
-			while (++i < length) {
+			handlers(event) {
 				
-				switch ((node = slottedNodes[i]).id) {
+				const	{ detail: { isDischarged, target } } = event,
+						method = isDischarged ? 'remove' : 'add' + 'Listener';
+				
+				switch (target.id) {
 					
 					case 'add-after':
-					this.addListener(node, 'click', this.interactedAddAfterButton);
+					this[method](target, 'click', this.interactedAddAfterButton);
 					break;
 					
 					case 'add-before':
-					this.addListener(node, 'click', this.interactedAddBeforeButton);
+					this[method](target, 'click', this.interactedAddBeforeButton);
 					break;
 					
 				}
@@ -93,7 +98,7 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 	};
 	
-	static [HTMLCustomShadowElement.$init]() {
+	static [HTMLShadowListenerElement.$init]() {
 		
 		const	{
 					changedEditable,
@@ -124,39 +129,71 @@ export default class HTMLScenarioControllerElement extends HTMLCustomShadowEleme
 		
 	}
 	
+	createEditor(value) {
+		
+		if (!(value instanceof Element)) {
+			
+			const	{ isLine, value: v } =
+						(typeof value === 'string' ? (value = { value }) : value) && typeof value === 'object' ? value : {};
+			
+			(value = document.createElement(isLine ? 'input' : 'textarea')).value = v ?? '';
+			
+		} else if (value.tagName === 'EDITABLE-ELEMENT') return value;
+		
+		const	editor = document.createElement('editable-element'),
+				node = document.createElement('node-element');
+		
+		value.slot = 'editor',
+		editor.slot = 'node',
+		editor.appendChild(value),
+		node.appendChild(editor),
+		node.appendChild(document.getElementById('scenario-controller-wrapper-parts').content.cloneNode(true));
+		
+		return node;
+		
+	}
+	//coco add,insertEditorsAfter,insertEditorsBefore を整理
 	add(...values) {
 		
 		const { paragraphs } = this, { length } = values;
-		let i,v, editor, node;
+		let i;
 		
 		i = -1;
-		while (++i < length) {
+		while (++i < length) values[i] = this.createEditor(values[i]);
+		
+		paragraphs.append(...values);
+		
+	}
+	
+	insertEditorsAfter(referenceNode, ...values) {
+		
+		if (this.paragraphs === referenceNode.parentElement) {
 			
-			if ((v = values[i])?.tagName !== 'EDITABLE-ELEMENT') {
-				
-				if (!(v instanceof HTMLElement)) {
-					
-					typeof v === 'string' && (v = { value: v }),
-					(v && typeof v === 'object') || (v = {});
-					
-					const { isLine, value } = v;
-					
-					(editor = document.createElement(isLine ? 'input' : 'textarea')).value = value ?? '';
-					
-				}
-				
-				(editor ||= v).slot = 'editor',
-				(v = document.createElement('editable-element')).appendChild(editor),
-				editor = undefined;
-				
-			}
+			const { length } = values;
+			let i;
 			
-			(node = values[i] = document.createElement('node-element')).appendChild(v).slot = 'node',
-			node.appendChild(document.getElementById('scenario-controller-wrapper-parts').content.cloneNode(true));
+			i = -1;
+			while (++i < length) values[i] = this.createEditor(values[i]);
+			
+			referenceNode.after(...values);
 			
 		}
 		
-		paragraphs.append(...values);
+	}
+	
+	insertEditorsBefore(referenceNode, ...values) {
+		
+		if (this.paragraphs === referenceNode.parentElement) {
+			
+			const { length } = values;
+			let i;
+			
+			i = -1;
+			while (++i < length) values[i] = this.createEditor(values[i]);
+			
+			referenceNode.before(...values);
+			
+		}
 		
 	}
 	

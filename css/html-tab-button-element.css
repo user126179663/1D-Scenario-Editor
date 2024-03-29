@@ -36,6 +36,17 @@
 }
 
 #body {
+	align-items: center;
+	display: flex;
+	height: max-content;
+	position: absolute;
+	translate: 0 -50%;
+	width: max-content;
+	z-index: 4;
+	writing-mode: horizontal-tb;
+}
+
+#node {
 	
 	align-items: center;
 	background: var(--button-bg);
@@ -50,31 +61,26 @@
 	justify-content: space-between;
 	margin: .1rem;
 	padding: .5rem .54rem;
-	position: absolute;
 	right: 0;
-	translate: -33% -50%;
-	width: max-content;
-	writing-mode: horizontal-tb;
-	z-index: 4;
 	
 }
-:host(:hover) #body {
+#root:hover #node {
 	
 	animation: in .2s ease .0s 1 normal forwards running;
 	
 }
 @keyframes in {
 	
-	from { opacity: 0; translate: -23% -50%; }
-	to { opacity: 1; translate: -33% -50%; }
+	from { opacity: 0; translate: -0% 0%; }
+	to { opacity: 1; translate: -10% 0%; }
 	
 }
-:host(:not([selected])) #body {
+:host(:not([selected])) #node {
 	
 	box-shadow:	none;
 	
 }
-:host(:not([selected])) #body:hover {
+:host(:not([selected])) #node:hover {
 	
 	background: rgba(0,0,0,.08);
 	
@@ -92,13 +98,13 @@
 	
 }
 
-#ctrl {
+.ctrl {
 	
 	display: none;
 	
 }
 
-:host(tab-button[selected]) #ctrl {
+:host(tab-button[selected]) .ctrl {
 	
 	display: block;
 	
