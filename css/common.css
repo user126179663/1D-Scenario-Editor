@@ -73,7 +73,13 @@ input:not([type]) {
 	
 }
 
-button {
+button.none {
+	
+	background: none;
+	border: none;
+	
+}
+button:not(.default) {
 	
 	background: var(--button-bg);
 	border: none;
@@ -90,30 +96,30 @@ button {
 	z-index: 1;
 	
 }
-button.wm-h {
+button:not(.default).wm-h {
 	
 	padding: .1rem .5rem;
 	
 }
-button[data-hint] {
+button:not(.default)[data-hint] {
 	
 	display: flex;
 	justify-content: center;
 	
 }
-button:not(:hover) {
+button:not(.default):not(:hover) {
 	
 	z-index: 0;
 	
 }
-button:hover {
+button:not(.default):hover {
 	
 	box-shadow:	0px 0px 0px 1px rgba(0,0,0,.8),
 					0px .2rem .3rem .05rem rgba(0,0,0,.1);
 	background: rgba(255,255,255,1);
 	
 }
-button:active {
+button:not(.default):active {
 	
 	color: white;
 	box-shadow:	0px 0px 0px 1px rgba(0,0,0,.8);
@@ -264,5 +270,48 @@ io-point > .io-point-menu .io-point-sub-menu {
 .hint-8[data-hint]::before {
 	
 	margin-top: -120%;
+	
+}
+
+.arrow-prev-after,
+.arrow-prev-before,
+.arrow-next-after,
+.arrow-next-before {
+	
+	--arrow-size: .6rem;
+	--arrow-width: 3px;
+	
+	align-items: center;
+	display: flex;
+	
+}
+.arrow-prev-after,
+.arrow-prev-before {
+	
+	--arrow-margin: .5rem 0 0 0;
+	--arrow-rotate: 135deg;
+	
+}
+.arrow-next-after,
+.arrow-next-before {
+	
+	--arrow-margin: 0 0 .5rem 0;
+	--arrow-rotate: -45deg;
+	
+}
+.arrow-next-before::before,
+.arrow-next-after::after,
+.arrow-prev-before::before,
+.arrow-prev-after::after {
+	
+	border: var(--arrow-width) solid red;
+	border-top-width: 0;
+	border-right-width: 0;
+	content: "";
+	display: block;
+	height: var(--arrow-size);
+	margin: var(--arrow-margin);
+	rotate: var(--arrow-rotate);
+	width: var(--arrow-size);
 	
 }

@@ -35,11 +35,12 @@
 						</nav>
 					</io-point>
 					
-					<section id="doc-tabs" class="tabs-container"></section>
+					<!--<section id="doc-tabs" class="tabs-container"></section>-->
+					<tab-container id="tabs"></tab-container>
 					
 				</header>
 				
-				<section id="doc-tab-views" class="tab-views-container"></section>
+				<section id="tab-views" class="tab-views-container"></section>
 				
 			</section>
 			
@@ -73,11 +74,12 @@
 						<label for="name">文書名</label>
 						<input id="name" value="">-->
 					</div>
-					<section id="scenarios-node-tabs-container" class="tabs-container"></section>
+					<!--<section id="scenarios-node-tabs-container" class="tabs-container"></section>-->
+					<tab-container id="tabs"></tab-container>
 				</header>
 				
 				
-				<section id="scenarios-node-tab-views-container" class="tab-views-container"></section>
+				<section id="tab-views" class="tab-views-container"></section>
 				
 				<!--<section id="container"></section>-->
 				
@@ -117,7 +119,8 @@
 						</nav>
 					</io-point>-->
 					
-					<section id="scenarios-tabs"></section>
+					<!--<section id="scenarios-tabs"></section>-->
+					<tab-container id="scenarios-tabs"></tab-container>
 					
 				</div>
 				
@@ -158,7 +161,7 @@
 			
 			<div id="root">
 				
-				<nav id="nav-before" class="balloon">
+				<nav id="nav-before" class="balloon no-first">
 					<div id="nav-before-container" class="balloon-container">
 						<slot name="nav-before"></slot>
 					</div>
@@ -196,11 +199,18 @@
 		</template>
 		
 		<template id="scenario-node-wrapper-parts">
+			
 			<button id="create-new-sec" class="wm-h" type="button" slot="nav-content" data-hint="節を新規作成">✨</button>
 			<button id="duplicate-current-sec" class="wm-h" type="button" slot="nav-content" data-hint="現在の節を複製">🖨</button>
 			<button id="delete-current-sec" class="wm-h" type="button" slot="nav-content" data-hint="現在の節を削除">❌</button>
+			
+			<button id="copy-next-before" class="hint-8 wm-h" type="button" slot="nav-before" data-hint="次の節を複製して挿入">🖨️</button>
 			<button id="add-before" class="hint-8 wm-h" type="button" slot="nav-before" data-hint="新しい節を挿入">📝</button>
+			<button id="copy-prev-before" class="hint-8 wm-h no-first" type="button" slot="nav-before" data-hint="前の節を複製して挿入">🖨️</button>
+			
+			<button id="copy-next-after" class="hint-8 wm-h no-last" type="button" slot="nav-after" data-hint="次の節を複製して挿入">🖨️</button>
 			<button id="add-after" class="hint-8 wm-h" type="button" slot="nav-after" data-hint="新しい節を挿入">📝</button>
+			<button id="copy-prev-after" class="hint-8 wm-h" type="button" slot="nav-after" data-hint="前の節を複製して挿入">🖨️</button>
 		</template>
 		
 		<template id="scenario-controller-wrapper-parts">
@@ -394,6 +404,23 @@
 		
 		<template id="tab-button-ctrl-parts">
 			<button id="close" slot="ctrl-before" type="button">❌</button>
+		</template>
+		
+		<template id="tab-container">
+			
+			<link rel="stylesheet" href="css/html-tab-container-element.css">
+			
+			<section id="root">
+				<section id="before-container"><slot name="before"></section>
+				<section id="container"><slot name="container"></section>
+				<section id="after-container"><slot name="after"></section>
+			</section>
+			
+		</template>
+		
+		<template id="tab-container-parts">
+			<button class="default none prepend-tab arrow-next-before" slot="before" type="button"></button>
+			<button class="default none append-tab arrow-prev-before" slot="after" type="button"></button>
 		</template>
 		
 	</body>

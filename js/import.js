@@ -1,3 +1,4 @@
+import './custom-elements/html-tab-element.js';
 import './custom-elements/html-editable-element.js';
 import './custom-elements/html-scenario-editor-element.js';
 import './custom-elements/html-scenario-node-element.js';
@@ -9,5 +10,4 @@ import './custom-elements/html-image-loader-element.js';
 import './custom-elements/html-resize-observer-element.js';
 import './custom-elements/html-docs-manager-element.js';
 import './custom-elements/html-doc-manager-element.js';
-import './custom-elements/html-tab-element.js';
 import './custom-elements/html-io-point-element.js';

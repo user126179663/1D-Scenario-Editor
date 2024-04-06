@@ -1,17 +1,16 @@
-//import HTMLCustomShadowElement from './html-custom-element.js';
-import HTMLTabsManagerElement from './html-tab-element.js';
+import HTMLAppCommonBaseElement from './html-app-common-base-element.js';
 
-export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
+export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
 	static STORAGE_KEY_PREFIX = 'od-docs@'
 	static tagName = 'doc-man';
 	static defaultScenariosTabOption = { group: 'scenarios', tabContent: '題名未定' };
 	
-	static [HTMLTabsManagerElement.$attribute] = {
+	static [HTMLAppCommonBaseElement.$attribute] = {
 	};
 	
-	static [HTMLTabsManagerElement.$bind] = {
+	static [HTMLAppCommonBaseElement.$bind] = {
 		
 		interactedCreateNewEditionButton(event) {
 			
@@ -43,9 +42,51 @@ export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 			
 		},
 		
+		onAppendTab(event) {
+			
+			const { scenariosNodeTabsContainer } = this,
+					scenariosNode = document.createElement('scenarios-node'),
+					scenarioNode = document.createElement('scenario-node'),
+					scenarioCtrl = document.createElement('scenario-controller');
+			
+			scenarioCtrl.add(null),
+			scenarioNode.add(scenarioCtrl),
+			scenariosNode.appendScenarioNodes(scenarioNode),
+			
+			this.appendScenariosNodes(scenariosNode),
+			
+			scenariosNodeTabsContainer.lastElementChild?.select?.();
+			
+		},
+		
+		onPrependTab(event) {
+			
+			const { scenariosNodeTabsContainer } = this,
+					scenariosNode = document.createElement('scenarios-node'),
+					scenarioNode = document.createElement('scenario-node');
+			
+			scenarioNode.add(null),
+			scenariosNode.appendScenarioNodes(scenarioNode),
+			
+			this.prependScenariosNodes(scenariosNode),
+			
+			scenariosNodeTabsContainer.lastElementChild?.select?.();
+			
+		},
+		
 		saved() {
 			
 			this.classList.remove('mutated');
+			
+		}
+		
+	};
+	
+	static [HTMLAppCommonBaseElement.$tabCreator] = {
+		
+		['#tabs'](target, index, length, tabButton, callee, targets) {
+			
+			return this.constructor.defaultScenariosTabOption;
 			
 		}
 		
@@ -100,7 +141,7 @@ export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 		
 	}
 	
-	static [HTMLTabsManagerElement.$init]() {
+	static [HTMLAppCommonBaseElement.$init]() {
 		
 		const	{
 					closeButton,
@@ -111,10 +152,15 @@ export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 					interactedCreateNextEditionButton,
 					interactedSaveButton,
 					mutated,
+					onAppendTab,
+					onPrependTab,
 					saveButton,
 					saved,
+					scenariosNodeTabsContainer,
 					shadowRoot
 				} = this;
+		
+		customElements.upgrade(scenariosNodeTabsContainer),
 		
 		this.addListener(createNewEditionButton, 'click', interactedCreateNewEditionButton),
 		this.addListener(createNextEditionButton, 'click', interactedCreateNextEditionButton),
@@ -122,7 +168,10 @@ export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 		this.addListener(this, 'mutated', mutated),
 		this.addListener(this, 'saved', saved),
 		this.addListener(closeButton, 'click', interactedCloseButton),
-		this.addListener(saveButton, 'click', interactedSaveButton);
+		this.addListener(saveButton, 'click', interactedSaveButton),
+		
+		this.addListener(scenariosNodeTabsContainer, 'append-tab', onAppendTab),
+		this.addListener(scenariosNodeTabsContainer, 'prepend-tab', onPrependTab);
 		
 	}
 	
@@ -270,12 +319,12 @@ export default class HTMLDocManagerElement extends HTMLTabsManagerElement {
 	}
 	get scenariosNodeTabsContainer() {
 		
-		return this.shadowRoot?.getElementById('scenarios-node-tabs-container');
+		return this.shadowRoot?.getElementById('tabs');
 		
 	}
 	get scenariosNodeTabViewsContainer() {
 		
-		return this.shadowRoot?.getElementById('scenarios-node-tab-views-container');
+		return this.shadowRoot?.getElementById('tab-views');
 		
 	}
 	get uid() {

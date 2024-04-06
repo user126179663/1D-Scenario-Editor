@@ -50,25 +50,23 @@ header {
 	
 }
 
-#scenarios-node-tabs-container {
-	
-	
+#tabs {
 	
 }
 
-#scenarios-node-tabs-container > tab-node {
+#tabs > tab-node {
 	
 	display: block;
 	width: 100%;
 	
 }
-#scenarios-node-tab-views-container {
+#tab-views {
 	
 	display: block;
 	width: 100%;
 	
 }
-#scenarios-node-tab-views-container > tab-node {
+#tab-views > tab-node {
 	
 	display: block;
 	width: 100%;

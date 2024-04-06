@@ -1,0 +1,18 @@
+#root {
+	
+	display: flex;
+	
+}
+
+#container {
+	
+	align-items: center;
+	display: flex;
+	
+}
+
+#container ::slotted(*) {
+	
+	margin: .3rem 0 !important;
+	
+}

@@ -22,7 +22,7 @@
 	
 }
 
-#doc-tabs {
+#tabs {
 	
 	z-index: 2;
 	
@@ -46,7 +46,7 @@ header {
 
 #storage-menu {}
 
-#doc-tab-views {
+#tab-views {
 	
 	box-sizing: border-box;
 	display: flex;
@@ -56,7 +56,7 @@ header {
 	
 }
 
-#doc-tab-views > tab-view[selected] {
+#tab-views > tab-view[selected] {
 	
 	display: block;
 	width: 100%;

@@ -28,6 +28,8 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 			const	content = document.createElement('span'),
 					contentEditor = document.createElement('editable-element');
 			
+			target ?? (target = document.createElement('scenario-controller')),
+			
 			content.textContent = '段落',
 			content.slot = 'editor',
 			

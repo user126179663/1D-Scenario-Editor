@@ -286,51 +286,61 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 	
 	static addTabs(prepends, tabsContainer, viewsContainer, tabOption, ...targets) {
 		
-		const	{ selectedIndex, tabs, views } = HTMLTabsManagerElement.implimentTabs(tabOption, ...targets),
+		const	implimented = HTMLTabsManagerElement.implimentTabs.call(this, tabOption, ...targets),
+				{ selectedIndex, tabs, views } = implimented,
 				method = prepends ? 'prepend' : 'append';
 		
-		tabsContainer[method](...tabs), viewsContainer[method](...views),
+		tabsContainer[method].apply(tabsContainer, tabs),
+		viewsContainer[method].apply(viewsContainer, views),
 		
-		selectedIndex === false || tabs.at(selectedIndex ?? 0).select();;
+		selectedIndex === false || tabs.at(selectedIndex ?? 0).select();
+		
+		return implimented;
 		
 	}
 	
+	// このメソッドの this を call や apply などを通じて任意のコンテキストで実行すると、
+	// option がコールバック関数の場合、その関数をそのコンテキストで実行する。
 	static implimentTabs(option, ...targets) {
 		
-		typeof option === 'string' && (option = { group: option }),
-		(option && (typeof option === 'object' || typeof option === 'function')) || (option = {});
+		switch (typeof option) {
+			
+			case 'string':
+			option = { group: option };
+			break;
+			
+			case 'function':
+			option = { callback: option };
+			break;
+			
+		}
+		
+		(option && typeof option === 'object') || (option = {});
+		
+		var	{ callback, ctrlPartsId = 'tab-button-ctrl-parts', group, icon, id, selectedIndex, tabContent } = option,
+				target;
 		
 		const length = typeof targets[0] === 'number' ? targets.splice(0,1)[0] : targets.length,
 				tabs = [],
 				views = [],
-				isObjectOption = typeof option === 'object',
-				ctrlParts = document.getElementById('tab-button-ctrl-parts');
+				ctrlParts = document.getElementById(ctrlPartsId)?.content,
+				hasCallback = typeof callback === 'function';
 		
 		let i, tabButton;
-		
-		if (isObjectOption) {
-			
-			var { group, icon, id, selectedIndex, tabContent } = option, target;
-			
-		}
 		
 		i = -1;
 		while (++i < length) {
 			
 			tabButton = document.createElement('tab-button'),
 			
-			ctrlParts && tabButton.append(ctrlParts.content.cloneNode(true));
+			ctrlParts && tabButton.append(ctrlParts.cloneNode(true));
 			
-			if (isObjectOption) {
-				
-				target = targets[i];
-				
-			} else {
+			if (hasCallback) {
 				
 				var	{ group, icon, id, selectedIndex, tabContent, target = targets[i] } =
-							option?.(targets[i], i, length, tabButton, ...arguments);
+							callback.call(this, targets[i], i, length, tabButton, option, ...arguments);
 				
-			}
+			} else target = targets[i];
 			
 			const	{ tab, view } = tabButton.impliment(group, target, tabContent, id, icon);
 			
@@ -353,7 +363,7 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 					referencePeerNode = isTab ?	rootNode.getElementById(id) :
 															rootNode.querySelector(`tab-node[for="${id}"]`),
 					method = insertsBefore ? 'before' : 'after',
-					{ tabs, views } = HTMLTabsManagerElement.implimentTabs(tabOption, ...targets);
+					{ tabs, views } = HTMLTabsManagerElement.implimentTabs.call(this, tabOption, ...targets);
 			
 			isTab ?	(referenceNode[method](...tabs), referencePeerNode[method](...views)) :
 						(referencePeerNode[method](...tabs), referenceNode[method](...views)),
@@ -380,6 +390,52 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 			
 		},
 		
+		onTabCreate(event, prepends) {
+			
+			const { tabListeners } = this, { length } = tabListeners;
+			
+			if (length) {
+				
+				const	{ isArray } = Array,
+						{ asArray } = HTMLShadowListenerElement,
+						{ generateTabTarget, shadowRoot } = this,
+						{ detail, type } = event;
+				let i, tabListener;
+				
+				i = -1;
+				while (++i < length) {
+					
+					if ((tabListener = tabListeners[i]) && typeof tabListener === 'object') {
+						
+						const { target, types } = tabListener;
+						
+						if (asArray(types).indexOf(type) !== -1 && detail.matches(target)) {
+							
+							const	{ args, container: c = detail, option: rawOption, viewer: v } = tabListener,
+									container = typeof c === 'string' ? shadowRoot.querySelector(c) : c,
+									viewer = typeof v === 'string' ? shadowRoot.querySelector(v) : v,
+									method = (prepends ? 'prepend' : 'append') + 'Tabs',
+									option =	typeof rawOption === 'function' ? { callback: rawOption } : rawOption;
+							
+							option.container = container,
+							option.viewer = viewer,
+							
+							isArray(args) ?	this[method](container, viewer, option, ...args) :
+													args === undefined ?	this[method](container, viewer, option) :
+																				this[method](container, viewer, option, args),
+							
+							container.lastElementChild?.select?.();
+							
+						}
+						
+					}
+					
+				}
+			
+			}
+			
+		},
+		
 		tabClosed(event) {
 			
 			const	{ detail: { group } } = event,
@@ -393,6 +449,21 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		
 	};
 	
+	static [HTMLShadowListenerElement.$event] = [
+		
+		{
+			handlers(event) {
+				
+				this.onTabCreate(event, event.type === 'tab-prepend');
+				
+			},
+			id: 'HTMLTabManagerElement.default.tabAppend.tabPrepend',
+			targets: true,
+			types: [ 'tab-append', 'tab-prepend' ]
+		}
+		
+	];
+	
 	constructor() {
 		
 		super();
@@ -402,13 +473,14 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		this[HTMLTabsManagerElement.$selectionHistory] = {},
 		
 		this.addListener(shadowRoot, 'changed-selection', changedTabSelection),
+		
 		this.addListener(this, 'tab-close', tabClosed);
 		
 	}
 	
 	addTabs(prepends, tabsContainer, viewsContainer) {
 		
-		this.isOwnNodes(tabsContainer, viewsContainer) && HTMLTabsManagerElement.addTabs(...arguments);
+		this.isOwnNodes(tabsContainer, viewsContainer) && HTMLTabsManagerElement.addTabs.call(this, ...arguments);
 		
 	}
 	
@@ -420,7 +492,7 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 	
 	insertTabs(insertsBefore, referenceNode) {
 		
-		this.isOwnNodes(referenceNode) && HTMLTabsManagerElement.insertTabs(...arguments);
+		this.isOwnNodes(referenceNode) && HTMLTabsManagerElement.insertTabs.call(this, ...arguments);
 		
 	}
 	
@@ -442,4 +514,158 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		
 	}
 	
+	get tabListeners() {
+		
+		return HTMLShadowListenerElement.asArray(this.constructor[HTMLTabsManagerElement.$tab]);
+		
+	}
+	
 }
+
+export class HTMLTabContainerElement extends HTMLShadowListenerElement {
+	
+	static SLOT_NAME = 'container';
+	static moInit = { childList: true };
+	static tagName = 'tab-container';
+	
+	static [HTMLCustomShadowElement.$bind] = {
+		
+		interactedAppendTab(event) {
+			
+			this.bubble('tab-append', this);
+			
+		},
+		
+		interactedPrependTab(event) {
+			
+			this.bubble('tab-prepend', this);
+			
+		}
+		
+	};
+	
+	static [HTMLCustomShadowElement.$init]() {
+		
+		this.appendChild(document.getElementById('tab-container-parts').content.cloneNode(true));
+		
+	}
+	
+	static [HTMLShadowListenerElement.$slot] = {
+		
+		'[name="after"]': {
+			
+			['.append-tab'](event, slotted, slottedNodes) {
+				
+				this.addListener(slotted, 'click', this.interactedAppendTab);
+				
+			}
+			
+		},
+		
+		'[name="before"]': {
+			
+			['.prepend-tab'](event, slotted, slottedNodes) {
+				
+				this.addListener(slotted, 'click', this.interactedPrependTab);
+				
+			}
+			
+		}
+		
+	};
+	
+	static mutatedChildList(mrs) {
+		
+		const { SLOT_NAME } = HTMLTabContainerElement, { length } = mrs;
+		let i,i0,l0, addedNodes;
+		
+		i = -1;
+		while (++i < length) {
+			
+			if (l0 = (addedNodes = mrs[i].addedNodes).length) {
+				
+				i0 = -1;
+				while (++i0 < l0) addedNodes[i0].slot ||= SLOT_NAME;
+				
+			}
+			
+		}
+		
+	}
+	
+	constructor() {
+		
+		super();
+		
+		const { mutatedChildList, moInit } = HTMLTabContainerElement;
+		
+		(this.mo = new MutationObserver(this.mutatedChildList = mutatedChildList.bind(this))).observe(this, moInit);
+		
+	}
+	
+	connectedCallback() {
+		
+		const { SLOT_NAME } = HTMLTabContainerElement, { children } = this, { length } = children;
+		let i;
+		
+		i = -1;
+		while (++i < length) children[i].slot ||= SLOT_NAME;
+		
+	}
+	
+	//appendTabs(viewsContainer, option) {
+	//	
+	//	if (this.getRootNode() === viewsContainer.getRootNode()) {
+	//		
+	//		const	{ tabs, views } = HTMLTabsManagerElement.addTabs(undefined, this, ...arguments),
+	//				{ length } = tabs;
+	//		let i;
+	//		
+	//		i = -1;
+	//		while (++i < length) tabs[i].slot = 'container';
+	//		
+	//	}
+	//	
+	//}
+	//
+	//prependTabs(viewsContainer, option) {
+	//	
+	//	if (this.getRootNode() === viewsContainer.getRootNode()) {
+	//		
+	//		const	{ tabs, views } = HTMLTabsManagerElement.addTabs(true, this, ...arguments),
+	//				{ length } = tabs;
+	//		let i;
+	//		
+	//		i = -1;
+	//		while (++i < length) tabs[i].slot = 'container';
+	//		
+	//	}
+	//	
+	//}
+	//
+	//removeTabs() {
+	//}
+	
+	get after() {
+		
+		return this.shadowRoot?.getElementById?.('after-container');
+		
+	}
+	get container() {
+		
+		return this.shadowRoot?.getElementById?.('container');
+		
+	}
+	get tabs() {
+		
+		return this.container?.assignedNodes();
+		
+	}
+	get before() {
+		
+		return this.shadowRoot?.getElementById?.('before-container');
+		
+	}
+	
+}
+HTMLTabContainerElement.define();

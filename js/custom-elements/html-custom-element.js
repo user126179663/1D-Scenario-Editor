@@ -44,6 +44,23 @@ export class HTMLCustomElement extends HTMLElement {
 		
 	}
 	
+	static asArray(target) {
+		
+		return target === undefined ? [] : Array.isArray(target) ? target : [ target ];
+		
+	}
+	// 第一引数 prototype に指定されたオブジェクトかインスタンスが、第二引数 target に指定されたオブジェクトを継承している場合、
+	// インスタンスのコンストラクターを返す。そうでない場合 null を返す。
+	static asPrototype(prototype, target) {
+		
+		return	(
+						prototype.constructor === Function ?
+							(prototype.prototype === target || prototype === target) && prototype :
+							prototype instanceof target && prototype.constructor
+					) || null;
+		
+	}
+	
 	// 第一引数 target に指定したオブジェクトに、第二引数 source に指定したオブジェクトのプロパティをコピーする。
 	// 第三引数 filter に、プロパティ名を列挙した Array 指定すると、filter 内に列挙されたプロパティ名だけを対象にコピーする。
 	// filter が未指定の場合、すべてのプロパティがコピーされる。
@@ -182,10 +199,11 @@ export class HTMLCustomElement extends HTMLElement {
 		
 	}
 	
-	static ownKeys(target) {
+	// 第一引数 target に指定されたオブジェクトが、あるオブジェクトのインスタンスである場合はそのオブジェクトを、
+	// そうでない場合は指定されたそのオブジェクトをそのまま返す。
+	static getConstructor(target) {
 		
-		return	target && typeof target === 'object' ?
-						[ ...Object.getOwnPropertySymbols(target), ...Object.keys(target) ] : null;
+		return target.constructor === Function ? target : target?.constructor;
 		
 	}
 	
@@ -211,6 +229,14 @@ export class HTMLCustomElement extends HTMLElement {
 		
 	}
 	
+	// 第一引数 prototype に指定されたオブジェクトかインスタンスが、第二引数 target に指定されたオブジェクトを継承している場合、true を返す。
+	static isPrototype(prototype, target) {
+		
+		return prototype.constructor === Function ?	prototype.prototype === target || prototype === target :
+																	prototype instanceof target;
+		
+	}
+	
 	// target から辿れるプロトタイプが持つ propertyName に一致するプロパティが Array であれば、
 	// それらの Array 内のすべての要素を target から近い順に新しい配列に Array.prototype.push を通じて追加される。
 	// inverts に true を指定すると、遠い順に追加される。
@@ -224,7 +250,7 @@ export class HTMLCustomElement extends HTMLElement {
 			let i;
 			
 			i = -1;
-			while (++i < length) merged.push(...props[i0]);
+			while (++i < length) merged.push(...props[i]);
 			
 			return merged;
 			
@@ -389,6 +415,14 @@ export class HTMLCustomElement extends HTMLElement {
 			}
 			
 		}
+		
+	}
+	
+	// 第一引数 target に指定されたオブジェクトに直接設定されたプロパティを、Symbol をキーにもつものも含めて配列に列挙して返す。
+	static ownKeys(target) {
+		
+		return	target && typeof target === 'object' ?
+						[ ...Object.getOwnPropertySymbols(target), ...Object.keys(target) ] : null;
 		
 	}
 	

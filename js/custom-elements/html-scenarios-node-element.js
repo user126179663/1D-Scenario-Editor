@@ -6,45 +6,45 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 	static tagName = 'scenarios-node';
 	static defaultScenarioTabOption = { group: 'scenarios', tabContent: '章' };
 	
-	static [HTMLTabsManagerElement.$event] = {
+	static [HTMLTabsManagerElement.$event] = [
 		
-		'node-slotted': [
-			{
-				targets: true,
-				handlers(event) {
+		{
+			types: 'node-slotted',
+			targets: true,
+			handlers(event) {
+				
+				const	{ detail: { isDischarged, target } } = event,
+						method = isDischarged ? 'remove' : 'add' + 'Listener';
+				
+				switch (target.id) {
 					
-					const	{ detail: { isDischarged, target } } = event,
-							method = isDischarged ? 'remove' : 'add' + 'Listener';
+					case 'add-after':
+					this[method](target, 'click', this.interactedAddAfterButton);
+					break;
 					
-					switch (target.id) {
-						
-						case 'add-after':
-						this[method](target, 'click', this.interactedAddAfterButton);
-						break;
-						
-						case 'add-before':
-						this[method](target, 'click', this.interactedAddBeforeButton);
-						break;
-						
-						case 'create-new-sec':
-						this[method](target, 'click', this.interactedCreateSecButton);
-						break;
-						
-						case 'duplicate-current-sec':
-						this[method](target, 'click', this.interactedDuplicateSecButton);
-						break;
-						
-						case 'delete-current-sec':
-						this[method](target, 'click', this.interactedDeleteSecButton);
-						break;
-						
-					}
+					case 'add-before':
+					this[method](target, 'click', this.interactedAddBeforeButton);
+					break;
+					
+					case 'create-new-sec':
+					this[method](target, 'click', this.interactedCreateSecButton);
+					break;
+					
+					case 'duplicate-current-sec':
+					this[method](target, 'click', this.interactedDuplicateSecButton);
+					break;
+					
+					case 'delete-current-sec':
+					this[method](target, 'click', this.interactedDeleteSecButton);
+					break;
 					
 				}
+				
 			}
-		]
+			
+		}
 		
-	};
+	];
 	
 	static wrapScenarioNode(scenarioNode) {
 		/*
@@ -138,15 +138,46 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 			scenariosTabsContainer.appendChild(tab),
 			scenariosContainer.appendChild(view);
 			
+		},
+		
+		onAppendTab(event) {
+			
+			const	{ scenariosTabsContainer } = this,
+					scenarioController = document.createElement('scenario-controller'),
+					scenarioNode = document.createElement('scenario-node');
+			
+			scenarioController.add(null),
+			scenarioNode.add(scenarioController),
+			this.appendScenarioNodes(scenarioNode),
+			
+			scenariosTabsContainer.lastElementChild?.select?.();
+			
+		},
+		
+		onPrependTab(event) {
+			hi(event);
 		}
 		
 	};
 	
 	static [HTMLTabsManagerElement.$init]() {
 		
-		const { addButton, interactedAddButton, shadowRoot, nodeSlotted } = this;
+		const {
+					addButton,
+					interactedAddButton,
+					shadowRoot,
+					nodeSlotted,
+					onAppendTab,
+					onPrependTab,
+					scenariosTabsContainer
+				} = this;
 		
-		this.addListener(addButton, 'click', interactedAddButton);
+		customElements.upgrade(scenariosTabsContainer),
+		
+		this.addListener(addButton, 'click', interactedAddButton),
+		
+		this.addListener(scenariosTabsContainer, 'append-tab', onAppendTab),
+		this.addListener(scenariosTabsContainer, 'prepend-tab', onPrependTab);
 		
 		//this.addListener(shadowRoot, 'node-slotted', nodeSlotted);
 		

@@ -69,16 +69,14 @@ export default class HTMLScenarioControllerElement extends HTMLShadowListenerEle
 		
 	};
 	
-	static [HTMLShadowListenerElement.$event] = {
+	static [HTMLShadowListenerElement.$event] = [
 		
-		'node-slotted': {
-			
+		{
+			types: 'node-slotted',
 			targets: true,
-			
 			handlers(event) {
 				
-				const	{ detail: { isDischarged, target } } = event,
-						method = isDischarged ? 'remove' : 'add' + 'Listener';
+				const { detail: { isDischarged, target } } = event, method = isDischarged ? 'remove' : 'add' + 'Listener';
 				
 				switch (target.id) {
 					
@@ -93,10 +91,9 @@ export default class HTMLScenarioControllerElement extends HTMLShadowListenerEle
 				}
 				
 			}
-			
 		}
 		
-	};
+	];
 	
 	static [HTMLShadowListenerElement.$init]() {
 		
@@ -152,48 +149,41 @@ export default class HTMLScenarioControllerElement extends HTMLShadowListenerEle
 		return node;
 		
 	}
-	//coco add,insertEditorsAfter,insertEditorsBefore を整理
-	add(...values) {
+	
+	add() {
 		
-		const { paragraphs } = this, { length } = values;
+		this.deploy(this.paragraphs, 'append', arguments);
+		
+	}
+	
+	deploy(target, method, values) {
+		
+		const { length } = values;
 		let i;
 		
 		i = -1;
 		while (++i < length) values[i] = this.createEditor(values[i]);
 		
-		paragraphs.append(...values);
+		target[method]?.(...values);
 		
 	}
 	
-	insertEditorsAfter(referenceNode, ...values) {
+	insertEditors(isAfter, referenceNode, ...values) {
 		
-		if (this.paragraphs === referenceNode.parentElement) {
-			
-			const { length } = values;
-			let i;
-			
-			i = -1;
-			while (++i < length) values[i] = this.createEditor(values[i]);
-			
-			referenceNode.after(...values);
-			
-		}
+		this.paragraphs === referenceNode?.parentElement &&
+			this.deploy(referenceNode, isAfter ? 'after' : 'before', values);
+		
+	}
+	
+	insertEditorsAfter() {
+		
+		this.insertEditors(true, ...arguments);
 		
 	}
 	
 	insertEditorsBefore(referenceNode, ...values) {
 		
-		if (this.paragraphs === referenceNode.parentElement) {
-			
-			const { length } = values;
-			let i;
-			
-			i = -1;
-			while (++i < length) values[i] = this.createEditor(values[i]);
-			
-			referenceNode.before(...values);
-			
-		}
+		this.insertEditors(undefined, ...arguments);
 		
 	}
 	

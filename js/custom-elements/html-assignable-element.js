@@ -110,7 +110,7 @@ HTMLAssignableElement[HTMLAssignableElement.$handler] = function (event) {
 			slot = this.constructor[$slot],
 			{ target } = event,
 			{ assigned, discharged } = this.recordSlotting(target);
-	let i,l,i0,l0,k,v, isDischarged, changed, node, handler;
+	let i,l,i0,l0,k,v,k0, isDischarged, changed, node, handler;
 	
 	isDischarged = -1;
 	while (++isDischarged < 2) {
@@ -132,11 +132,11 @@ HTMLAssignableElement[HTMLAssignableElement.$handler] = function (event) {
 					i = -1;
 					while (++i < l) {
 						
-						for (k in v) {
+						for (k0 in v) {
 							
-							if ((node = changed[i]).matches(k)) {
+							if ((node = changed[i]).matches(k0)) {
 								
-								if (isArray(handler = v[k])) {
+								if (isArray(handler = v[k0])) {
 									
 									i0 = -1, l0 = handler.length;
 									while (++i0 < l0) handler[i0]?.call?.(this, event, node, !!isDischarged, changed);

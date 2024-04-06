@@ -1,18 +1,19 @@
-//import HTMLCustomShadowElement from './html-custom-element.js';
-import HTMLTabsManagerElement from './html-tab-element.js';
+import HTMLAppCommonBaseElement from './html-app-common-base-element.js';
 
-export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
+export default class HTMLDocsManagerElement extends HTMLAppCommonBaseElement {
 	
 	static DEFAULT_STORAGE_KEY = '_';
 	static STORAGE_KEY_PREFIX = '1dse@';
 	static tagName = 'docs-man';
 	
-	static [HTMLTabsManagerElement.$attribute] = {
+	static [HTMLAppCommonBaseElement.$attribute] = {
 	};
 	
-	static [HTMLTabsManagerElement.$bind] = {
+	// このプロパティは、プロトタイプを辿った統合をされない。
+	// 一方、自身のプロパティとしてこのプロパティを上書きしなければ、プロトタイプ上の直近の同名プロパティが使われる。
+	static [HTMLAppCommonBaseElement.$tabCreator] = {
 		
-		generateTabTarget(target, index, length, tabButton, callee, targets) {
+		['#tabs'](target, index, length, tabButton, callee, targets) {
 			
 			const doc = document.createElement('doc-man'),
 					scenariosNode = document.createElement('scenarios-node'),
@@ -34,6 +35,33 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 			
 			return { tabContent: contentEditor, group: 'doc', target: doc };
 			
+		}
+		
+	};
+	
+	static [HTMLAppCommonBaseElement.$bind] = {
+		
+		emittedSaving(event) {
+			
+			const doc = event.composedPath()[0];
+			
+			if (doc?.tagName === 'DOC-MAN') {
+				
+				const	{ getStorage, setStorage, take } = HTMLDocsManagerElement,
+						{ id } = this,
+						{ uid } = doc,
+						data = getStorage(id),
+						{ docs = [] } = data,
+						index = take(docs, 'uid', uid, true),
+						{ length } = docs;
+				
+				(data.docs = docs)[index < length ? index : length] =
+					{ uid, doc: JSON.stringify(HTMLAppCommonBaseElement.jsonalize(doc)) },
+				
+				/*setStorage(id, data)*/true && doc.bubble('saved', this, true);
+				
+			}
+			
 		},
 		
 		interactedCreateButton(event) {
@@ -53,36 +81,33 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 					{ docs } = data,
 					{ docSelector } = this;
 			
-			this.container.replaceChildren(...HTMLTabsManagerElement.nodify(JSON.parse(docs[docSelector.selectedIndex])));
-			
-		},
-		
-		emittedSaving(event) {
-			
-			const doc = event.composedPath()[0];
-			
-			if (doc?.tagName === 'DOC-MAN') {
-				
-				const	{ getStorage, setStorage, take } = HTMLDocsManagerElement,
-						{ id } = this,
-						{ uid } = doc,
-						data = getStorage(id),
-						{ docs = [] } = data,
-						index = take(docs, 'uid', uid, true),
-						{ length } = docs;
-				
-				(data.docs = docs)[index < length ? index : length] =
-					{ uid, doc: JSON.stringify(HTMLTabsManagerElement.jsonalize(doc)) },
-				
-				/*setStorage(id, data)*/true && doc.bubble('saved', this, true);
-				
-			}
+			this.container.replaceChildren(...HTMLAppCommonBaseElement.nodify(JSON.parse(docs[docSelector.selectedIndex])));
 			
 		},
 		
 		mutated(event) {
 			
 			/^❣️\s*/.test(document.title) || (document.title = '❣️ ' + document.title);
+			
+		},
+		
+		onAppendTab(event) {
+			
+			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
+			
+			docTabsContainer.appendTabs(docTabViewsContainer, generateTabTarget, 1),
+			
+			docTabsContainer.lastElementChild?.select?.();
+			
+		},
+		
+		onPrependTab(event) {
+			
+			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
+			
+			docTabsContainer.prependTabs(docTabViewsContainer, generateTabTarget, 1),
+			
+			docTabsContainer.firstElementChild?.select?.();
 			
 		},
 		
@@ -185,7 +210,7 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 		
 	}
 	
-	static [HTMLTabsManagerElement.$init]() {
+	static [HTMLAppCommonBaseElement.$init]() {
 		
 		const	{
 					createButton,
@@ -198,6 +223,8 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 					mutated,
 					saved
 				} = this;
+		
+		//docTabsContainer.appendChild(document.getElementById('tab-container-parts').content.cloneNode(true)),
 		
 		this.addListener(createButton, 'click', interactedCreateButton),
 		this.addListener(docSelectorButton, 'click', interactedSelectorButton),
@@ -313,12 +340,12 @@ export default class HTMLDocsManagerElement extends HTMLTabsManagerElement {
 	}
 	get docTabsContainer() {
 		
-		return this.shadowRoot?.getElementById?.('doc-tabs');
+		return this.shadowRoot?.getElementById?.('tabs');
 		
 	}
 	get docTabViewsContainer() {
 		
-		return this.shadowRoot?.getElementById?.('doc-tab-views');
+		return this.shadowRoot?.getElementById?.('tab-views');
 		
 	}
 	

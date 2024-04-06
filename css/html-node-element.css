@@ -157,6 +157,14 @@
 #content {
 }
 
+:host(:not(:first-child)) .no-first,
+:host(:not(:first-child)) .no-last,
+:host(:first-child) ::slotted(.no-first),
+:host(:last-child) ::slotted(.no-last) {
+	
+	display: none !important;
+	
+}
 #nav-before.balloon {
 	
 	right: 0;
