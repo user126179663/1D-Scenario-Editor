@@ -284,96 +284,6 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 	static $selectionHistory = Symbol('HTMLTabsManagerElement.$selectionHistory');
 	static tagName = 'tabs-man';
 	
-	static addTabs(prepends, tabsContainer, viewsContainer, tabOption, ...targets) {
-		
-		const	implimented = HTMLTabsManagerElement.implimentTabs.call(this, tabOption, ...targets),
-				{ selectedIndex, tabs, views } = implimented,
-				method = prepends ? 'prepend' : 'append';
-		
-		tabsContainer[method].apply(tabsContainer, tabs),
-		viewsContainer[method].apply(viewsContainer, views),
-		
-		selectedIndex === false || tabs.at(selectedIndex ?? 0).select();
-		
-		return implimented;
-		
-	}
-	
-	// このメソッドの this を call や apply などを通じて任意のコンテキストで実行すると、
-	// option がコールバック関数の場合、その関数をそのコンテキストで実行する。
-	static implimentTabs(option, ...targets) {
-		
-		switch (typeof option) {
-			
-			case 'string':
-			option = { group: option };
-			break;
-			
-			case 'function':
-			option = { callback: option };
-			break;
-			
-		}
-		
-		(option && typeof option === 'object') || (option = {});
-		
-		var	{ callback, ctrlPartsId = 'tab-button-ctrl-parts', group, icon, id, selectedIndex, tabContent } = option,
-				target;
-		
-		const length = typeof targets[0] === 'number' ? targets.splice(0,1)[0] : targets.length,
-				tabs = [],
-				views = [],
-				ctrlParts = document.getElementById(ctrlPartsId)?.content,
-				hasCallback = typeof callback === 'function';
-		
-		let i, tabButton;
-		
-		i = -1;
-		while (++i < length) {
-			
-			tabButton = document.createElement('tab-button'),
-			
-			ctrlParts && tabButton.append(ctrlParts.cloneNode(true));
-			
-			if (hasCallback) {
-				
-				var	{ group, icon, id, selectedIndex, tabContent, target = targets[i] } =
-							callback.call(this, targets[i], i, length, tabButton, option, ...arguments);
-				
-			} else target = targets[i];
-			
-			const	{ tab, view } = tabButton.impliment(group, target, tabContent, id, icon);
-			
-			tabs[i] = tab, views[i] = view;
-			
-		}
-		
-		return { selectedIndex, tabs, views };
-		
-	}
-	
-	static insertTabs(insertsBefore, referenceNode, tabOption, ...targets) {
-		
-		const	isTab = referenceNode instanceof HTMLTabElement,
-				id = isTab ? referenceNode.tabFor : referenceNode instanceof HTMLTabViewElement && referenceNode.id;
-		
-		if (id) {
-			
-			const rootNode = referenceNode.getRootNode(),
-					referencePeerNode = isTab ?	rootNode.getElementById(id) :
-															rootNode.querySelector(`tab-node[for="${id}"]`),
-					method = insertsBefore ? 'before' : 'after',
-					{ tabs, views } = HTMLTabsManagerElement.implimentTabs.call(this, tabOption, ...targets);
-			
-			isTab ?	(referenceNode[method](...tabs), referencePeerNode[method](...views)) :
-						(referencePeerNode[method](...tabs), referenceNode[method](...views)),
-			
-			tabOption?.selectedIndex === false || tabs.at(tabOption?.selectedIndex ?? 0).select();
-			
-		}
-		
-	}
-	
 	static [HTMLCustomElement.$bind] = {
 		
 		changedTabSelection(event) {
@@ -414,18 +324,18 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 							const	{ args, container: c = detail, option: rawOption, viewer: v } = tabListener,
 									container = typeof c === 'string' ? shadowRoot.querySelector(c) : c,
 									viewer = typeof v === 'string' ? shadowRoot.querySelector(v) : v,
-									method = (prepends ? 'prepend' : 'append') + 'Tabs',
-									option =	typeof rawOption === 'function' ? { callback: rawOption } : rawOption;
+									option =	HTMLTabsManagerElement.normalizeTabOption(rawOption, this);
 							
 							option.container = container,
 							option.viewer = viewer,
+							option.prepends = prepends,
+							option.tabAttr ??= { slot: 'container' },
+							option.selectedIndex ??= -!prepends,
 							
-							isArray(args) ?	this[method](container, viewer, option, ...args) :
-													args === undefined ?	this[method](container, viewer, option) :
-																				this[method](container, viewer, option, args),
+							isArray(args) ?	this.addTabs(option, ...args) :
+													args === undefined ?	this.addTabs(option) : this.addTabs(option, args);
 							
-							container.lastElementChild?.select?.();
-							
+							//container.tabs?.at?.(-prepends)?.select?.();
 						}
 						
 					}
@@ -464,6 +374,135 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		
 	];
 	
+	static addTabs(option, ...targets) {
+		
+		typeof option === 'boolean' && (option = { prepends: option });
+		
+		const	implimented = HTMLTabsManagerElement.implimentTabs(option, ...targets),
+				{ option: { container, prepends, viewer }, selectedIndex, tabs, views } = implimented,
+				method = prepends ? 'prepend' : 'append';
+		
+		container?.[method]?.apply?.(container, tabs),
+		viewer?.[method]?.apply?.(viewer, views),
+		
+		selectedIndex === false || tabs.at(selectedIndex ?? 0).select();
+		
+		return implimented;
+		
+	}
+	
+	static implimentTabs(option, ...targets) {
+		
+		var	{
+					callback,
+					callbackThis,
+					ctrlPartsId = 'tab-button-ctrl-parts',
+					group,
+					icon,
+					id,
+					selectedIndex: defaultSelectedIndex,
+					tabAttr,
+					tabContent,
+					viewAttr
+				} = option = HTMLTabsManagerElement.normalizeTabOption(option),
+				target;
+		
+		const length = typeof targets[0] === 'number' ? targets.splice(0,1)[0] : targets.length,
+				tabs = [],
+				views = [],
+				ctrlParts = document.getElementById(ctrlPartsId)?.content,
+				hasCallback = typeof callback === 'function';
+		
+		let i,k, tabButton, selectedIndex;
+		
+		i = -1;
+		while (++i < length) {
+			
+			tabButton = document.createElement('tab-button'),
+			
+			ctrlParts && tabButton.append(ctrlParts.cloneNode(true));
+			
+			if (hasCallback) {
+				
+				var	{ group, icon, id, selectedIndex: currentSelectedIndex, tabContent, target = targets[i] } =
+							callback.call(callbackThis, targets[i], i, length, tabButton, option, ...arguments);
+				
+			} else target = targets[i];
+			
+			const	{ tab, view } = tabButton.impliment(group, target, tabContent, id, icon, option);
+			
+			if (tabAttr && typeof tabAttr === 'object')
+				for (k in tabAttr) tab.hasAttribute(k) || tab.setAttribute(k, tabAttr[k]);
+			if (viewAttr && typeof viewAttr === 'object')
+				for (k in viewAttr) view.hasAttribute(k) || view.setAttribute(k, viewAttr[k]);
+			
+			tabs[i] = tab, views[i] = view,
+			typeof currentSelectedIndex === 'number' && (selectedIndex = currentSelectedIndex);
+			
+		}
+		
+		return { option, selectedIndex: selectedIndex ?? defaultSelectedIndex, tabs, views };
+		
+	}
+	
+	static insertTabs(option, ...targets) {
+		
+		typeof option === 'boolean' && (option = { insertsBefore: option }),
+		option instanceof Element && (option = { referenceNode: option });
+		
+		const	{ referenceNode } = option ??= {},
+				isTab = referenceNode instanceof HTMLTabElement,
+				id = isTab ? referenceNode.tabFor : referenceNode instanceof HTMLTabViewElement && referenceNode.id;
+		
+		if (id) {
+			
+			const rootNode = referenceNode.getRootNode(),
+					referencePeerNode = isTab ? rootNode.getElementById(id) : rootNode.querySelector(`tab-node[for="${id}"]`),
+					{ option: { insertsBefore }, selectedIndex, tabs, views } =
+						HTMLTabsManagerElement.implimentTabs(option, ...targets),
+					method = insertsBefore ? 'before' : 'after';
+			
+			isTab ?	(referenceNode[method](...tabs), referencePeerNode[method](...views)) :
+						(referencePeerNode[method](...tabs), referenceNode[method](...views)),
+			
+			selectedIndex === false || tabs.at(selectedIndex ?? 0).select();
+			
+		}
+		
+	}
+	
+	static normalizeTabOption(option, callbackThis = this) {
+		
+		switch (typeof option) {
+			
+			case 'function':
+			option = { callback: option };
+			break;
+			
+			case 'number':
+			option = { selectedIndex: option };
+			break;
+			
+			case 'object':
+			option ||= {};
+			break;
+			
+			case 'string':
+			option = { group: option };
+			break;
+			
+			default:
+			option = {};
+			break;
+			
+		}
+		
+		option.callbackThis ??= callbackThis;
+		
+		return option;
+		
+	}
+	
 	constructor() {
 		
 		super();
@@ -478,41 +517,71 @@ export default class HTMLTabsManagerElement extends HTMLShadowListenerElement {
 		
 	}
 	
-	addTabs(prepends, tabsContainer, viewsContainer) {
+	addTabs(option) {
 		
-		this.isOwnNodes(tabsContainer, viewsContainer) && HTMLTabsManagerElement.addTabs.call(this, ...arguments);
+		option instanceof Element && (option = { container: option, viewer: option });
 		
-	}
-	
-	appendTabs() {
+		const { container, viewer } = option;
 		
-		this.addTabs(undefined, ...arguments);
-		
-	}
-	
-	insertTabs(insertsBefore, referenceNode) {
-		
-		this.isOwnNodes(referenceNode) && HTMLTabsManagerElement.insertTabs.call(this, ...arguments);
+		this.isOwnNodes(container, viewer) &&
+			(arguments[0] = option, HTMLTabsManagerElement.addTabs(...arguments));
 		
 	}
 	
-	insertTabsAfter() {
+	//appendTabs(option) {
+	//	
+	//	option instanceof Element && (option = { viewer: option }),
+	//	option && typeof option === 'object' ? (option.prepends = false) : (option = { prepends: false }),
+	//	
+	//	arguments[0] = option,
+	//	
+	//	this.addTabs(option, ...arguments);
+	//	
+	//}
+	
+	insertTabs(option) {
 		
-		this.insertTabs(undefined, ...arguments);
+		option instanceof Element && (option = { referenceNode: option });
+		
+		this.isOwnNodes(option?.referenceNode) &&
+			(arguments[0] = option, HTMLTabsManagerElement.insertTabs(...arguments));
 		
 	}
 	
-	insertTabsBefore() {
-		
-		this.insertTabs(true, ...arguments);
-		
-	}
+	//insertTabsAfter(option) {
+	//	
+	//	(option = HTMLTabsManagerElement.normalizeTabOption(option)) instanceof Element &&
+	//		(option = { referenceNode: option }),
+	//	option.insertsBefore = false,
+	//	
+	//	arguments[0] = option,
+	//	
+	//	this.insertTabs(...arguments);
+	//	
+	//}
+	//
+	//insertTabsBefore(option) {
+	//	
+	//	(option = HTMLTabsManagerElement.normalizeTabOption(option)) instanceof Element &&
+	//		(option = { referenceNode: option }),
+	//	option.insertsBefore = true,
+	//	
+	//	arguments[0] = option,
+	//	
+	//	this.insertTabs(...arguments);
+	//	
+	//}
 	
-	prependTabs() {
-		
-		this.addTabs(true, ...arguments);
-		
-	}
+	//prependTabs(option) {
+	//	
+	//	option instanceof Element && (option = { viewer: option }),
+	//	option && typeof option === 'object' ? (option.prepends = true) : (option = { prepends: true }),
+	//	
+	//	arguments[0] = option,
+	//	
+	//	this.addTabs(...arguments);
+	//	
+	//}
 	
 	get tabListeners() {
 		
@@ -527,6 +596,7 @@ export class HTMLTabContainerElement extends HTMLShadowListenerElement {
 	static SLOT_NAME = 'container';
 	static moInit = { childList: true };
 	static tagName = 'tab-container';
+	static containerAssignedNodesOption = { flatten: true };
 	
 	static [HTMLCustomShadowElement.$bind] = {
 		
@@ -656,9 +726,14 @@ export class HTMLTabContainerElement extends HTMLShadowListenerElement {
 		return this.shadowRoot?.getElementById?.('container');
 		
 	}
+	get containerSlot() {
+		
+		return this.container?.querySelector?.('slot[name="container"]');
+		
+	}
 	get tabs() {
 		
-		return this.container?.assignedNodes();
+		return	this.containerSlot?.assignedNodes?.(HTMLTabContainerElement.containerAssignedNodesOption);
 		
 	}
 	get before() {

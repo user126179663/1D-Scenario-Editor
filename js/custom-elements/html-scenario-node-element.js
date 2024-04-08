@@ -1,10 +1,10 @@
-import HTMLTabsManagerElement from './html-tab-element.js';
+import HTMLAppCommonBaseElement from './html-app-common-base-element.js';
 
-export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
+export default class HTMLScenarioNodeElement extends HTMLAppCommonBaseElement {
 	
 	static tagName = 'scenario-node';
 	
-	static [HTMLTabsManagerElement.$attribute] = {
+	static [HTMLAppCommonBaseElement.$attribute] = {
 		
 		editing: {
 			
@@ -21,7 +21,23 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 		
 	};
 	
-	static [HTMLTabsManagerElement.$bind] = {
+	static [HTMLAppCommonBaseElement.$createTab](target, index, length, tabButton, callee, targets, option) {
+		
+		const	content = document.createElement('span'),
+				contentEditor = document.createElement('editable-element');
+		
+		target ?? (target = document.createElement('scenario-controller')).add(null),
+		
+		content.textContent = '段落',
+		content.slot = 'editor',
+		
+		contentEditor.appendChild(content);
+		hi(target);
+		return { group: 'scenario', tabContent: contentEditor, target };
+		
+	}
+	
+	static [HTMLAppCommonBaseElement.$bind] = {
 		
 		generateTabTarget(target, index, length, tabButton, callee, targets) {
 			
@@ -56,7 +72,7 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 		
 	}
 	
-	static [HTMLTabsManagerElement.$init]() {
+	static [HTMLAppCommonBaseElement.$init]() {
 		
 		
 		
@@ -72,7 +88,7 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 		
 		const { container, generateTabTarget, tabContainer } = this;
 		
-		this.appendTabs(tabContainer, container, generateTabTarget, ...arguments);
+		this.addTabs({ callback: generateTabTarget, container: tabContainer, viewer: container }, ...arguments);
 		
 		//return;
 		//
@@ -132,7 +148,7 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 	
 	get container() {
 		
-		return this.shadowRoot?.getElementById?.('scenario');
+		return this.shadowRoot?.getElementById?.('tab-views');
 		
 	}
 	get editor() {
@@ -142,7 +158,7 @@ export default class HTMLScenarioNodeElement extends HTMLTabsManagerElement {
 	}
 	get tabContainer() {
 		
-		return this.shadowRoot?.getElementById?.('scenario-tabs');
+		return this.shadowRoot?.getElementById?.('tabs');
 		
 	}
 	

@@ -9,35 +9,29 @@ export default class HTMLDocsManagerElement extends HTMLAppCommonBaseElement {
 	static [HTMLAppCommonBaseElement.$attribute] = {
 	};
 	
-	// このプロパティは、プロトタイプを辿った統合をされない。
-	// 一方、自身のプロパティとしてこのプロパティを上書きしなければ、プロトタイプ上の直近の同名プロパティが使われる。
-	static [HTMLAppCommonBaseElement.$tabCreator] = {
+	static [HTMLAppCommonBaseElement.$createTab](target, index, length, tabButton, callee, targets, option) {
 		
-		['#tabs'](target, index, length, tabButton, callee, targets) {
-			
-			const doc = document.createElement('doc-man'),
-					scenariosNode = document.createElement('scenarios-node'),
-					scenarioNode = document.createElement('scenario-node'),
-					content = document.createElement('span'),
-					contentEditor = document.createElement('editable-element'),
-					scenarioController = document.createElement('scenario-controller');
-			
-			scenarioController.add(null),
-			scenarioNode.add(scenarioController),
-			scenariosNode.appendScenarioNodes(scenarioNode),
-			
-			doc.appendScenariosNodes(scenariosNode),
-			
-			content.textContent = doc.name,
-			content.slot = 'editor',
-			
-			contentEditor.appendChild(content);
-			
-			return { tabContent: contentEditor, group: 'doc', target: doc };
-			
-		}
+		const doc = document.createElement('doc-man'),
+				scenariosNode = document.createElement('scenarios-node'),
+				scenarioNode = document.createElement('scenario-node'),
+				content = document.createElement('span'),
+				contentEditor = document.createElement('editable-element'),
+				scenarioController = document.createElement('scenario-controller');
 		
-	};
+		scenarioController.add(null),
+		scenarioNode.add(scenarioController),
+		scenariosNode.appendScenarioNodes(scenarioNode),
+		
+		doc.appendScenariosNodes(scenariosNode),
+		
+		content.textContent = doc.name,
+		content.slot = 'editor',
+		
+		contentEditor.appendChild(content);
+		
+		return { tabContent: contentEditor, group: 'doc', target: doc };
+		
+	}
 	
 	static [HTMLAppCommonBaseElement.$bind] = {
 		
@@ -68,9 +62,9 @@ export default class HTMLDocsManagerElement extends HTMLAppCommonBaseElement {
 			
 			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
 			
-			this.appendTabs(docTabsContainer, docTabViewsContainer, generateTabTarget, 1),
+			this.addTabs({ callback: this.constructor.createTab, container: docTabsContainer, group: 'doc', selectedIndex: -1, viewer: docTabViewsContainer }, 1);
 			
-			docTabsContainer.lastElementChild?.select?.();
+			//docTabsContainer.lastElementChild?.select?.();
 			
 		},
 		
@@ -95,9 +89,9 @@ export default class HTMLDocsManagerElement extends HTMLAppCommonBaseElement {
 			
 			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
 			
-			docTabsContainer.appendTabs(docTabViewsContainer, generateTabTarget, 1),
+			this.addTabs({ callback: generateTabTarget, container: docTabsContainer, selectedIndex: -1, viewer: docTabViewsContainer }, 1);
 			
-			docTabsContainer.lastElementChild?.select?.();
+			//docTabsContainer.lastElementChild?.select?.();
 			
 		},
 		
@@ -105,9 +99,11 @@ export default class HTMLDocsManagerElement extends HTMLAppCommonBaseElement {
 			
 			const { docTabsContainer, docTabViewsContainer, generateTabTarget } = this;
 			
-			docTabsContainer.prependTabs(docTabViewsContainer, generateTabTarget, 1),
+			//docTabsContainer.prependTabs(docTabViewsContainer, generateTabTarget, 1),
+			//
+			//docTabsContainer.firstElementChild?.select?.();
 			
-			docTabsContainer.firstElementChild?.select?.();
+			this.addTabs({ callback: generateTabTarget, container: docTabsContainer, prepends: true, selectedIndex: 0, viewer: docTabViewsContainer }, 1);
 			
 		},
 		

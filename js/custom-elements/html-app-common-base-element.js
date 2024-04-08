@@ -2,6 +2,7 @@ import HTMLTabsManagerElement from './html-tab-element.js';
 
 export default class HTMLAppCommonBaseElement extends HTMLTabsManagerElement {
 	
+	static $createTab = Symbol('HTMLAppCommonBaseElement.createTab');
 	static $tabCreator = Symbol('HTMLAppCommonBaseElement.tabCreator');
 	
 	static [HTMLTabsManagerElement.$tab] = [
@@ -56,3 +57,14 @@ export default class HTMLAppCommonBaseElement extends HTMLTabsManagerElement {
 	}
 	
 }
+// このプロパティは、プロトタイプを辿った統合をされない。
+// 一方、自身のプロパティとしてこのプロパティを上書きしなければ、プロトタイプ上の直近の同名プロパティが使われる。
+HTMLAppCommonBaseElement[HTMLAppCommonBaseElement.$tabCreator] = {
+	
+	['#tabs']() {
+		
+		return this.constructor[HTMLAppCommonBaseElement.$createTab].call(this, ...arguments);
+		
+	}
+	
+};

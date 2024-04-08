@@ -1,16 +1,28 @@
-//import HTMLTabsManagerElement from './html-custom-element.js';
-import HTMLTabsManagerElement from './html-tab-element.js';
+import HTMLAppCommonBaseElement from './html-app-common-base-element.js';
 
-export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
+export default class HTMLScenariosNodeElement extends HTMLAppCommonBaseElement {
 	
 	static tagName = 'scenarios-node';
 	static defaultScenarioTabOption = { group: 'scenarios', tabContent: '章' };
 	
-	static [HTMLTabsManagerElement.$event] = [
+	static [HTMLAppCommonBaseElement.$createTab](target, index, length, tabButton, callee, targets, option) {
+		
+		const	scenarioNode = document.createElement('scenario-node'),
+				scenarioController = document.createElement('scenario-controller');
+		
+		scenarioController.add(null),
+		scenarioNode.add(scenarioController);
+		
+		return	{
+						...this.constructor.defaultScenarioTabOption,
+						target: HTMLScenariosNodeElement.wrapScenarioNode(scenarioNode)
+					};
+		
+	}
+	
+	static [HTMLAppCommonBaseElement.$event] = [
 		
 		{
-			types: 'node-slotted',
-			targets: true,
 			handlers(event) {
 				
 				const	{ detail: { isDischarged, target } } = event,
@@ -40,7 +52,9 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 					
 				}
 				
-			}
+			},
+			types: 'node-slotted',
+			targets: true
 			
 		}
 		
@@ -61,7 +75,7 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 		
 	}
 	
-	static [HTMLTabsManagerElement.$bind] = {
+	static [HTMLAppCommonBaseElement.$bind] = {
 		
 		generateTabTarget(target, index, length, tabButton, callee, targets) {
 			
@@ -160,24 +174,16 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 		
 	};
 	
-	static [HTMLTabsManagerElement.$init]() {
+	static [HTMLAppCommonBaseElement.$init]() {
 		
 		const {
 					addButton,
 					interactedAddButton,
 					shadowRoot,
-					nodeSlotted,
-					onAppendTab,
-					onPrependTab,
-					scenariosTabsContainer
+					nodeSlotted
 				} = this;
 		
-		customElements.upgrade(scenariosTabsContainer),
-		
-		this.addListener(addButton, 'click', interactedAddButton),
-		
-		this.addListener(scenariosTabsContainer, 'append-tab', onAppendTab),
-		this.addListener(scenariosTabsContainer, 'prepend-tab', onPrependTab);
+		this.addListener(addButton, 'click', interactedAddButton);
 		
 		//this.addListener(shadowRoot, 'node-slotted', nodeSlotted);
 		
@@ -210,7 +216,7 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 		
 		const { generateTabTarget, scenariosContainer, scenariosTabsContainer } = this;
 		
-		this.appendTabs(scenariosTabsContainer, scenariosContainer, generateTabTarget, ...arguments);
+		this.addTabs({ callback: generateTabTarget, container: scenariosTabsContainer, viewer: scenariosContainer }, ...arguments);
 		
 	}
 	
@@ -270,12 +276,12 @@ export default class HTMLScenariosNodeElement extends HTMLTabsManagerElement {
 	
 	get scenariosContainer() {
 		
-		return this.shadowRoot?.getElementById?.('scenarios');
+		return this.shadowRoot?.getElementById?.('tab-views');
 		
 	}
 	get scenariosTabsContainer() {
 		
-		return this.shadowRoot?.getElementById?.('scenarios-tabs');
+		return this.shadowRoot?.getElementById?.('tabs');
 		
 	}
 	get addButton() {

@@ -49,13 +49,13 @@ export default class HTMLShadowListenerElement extends HTMLAssignableElement {
 			i = i0 = i1 = -1;
 			while (++i < shadowListenersLength) {
 				
-				if (blockList.indexOf(id = (shadowListener = shadowListeners[i]).id) === -1) {
+				if ((id = (shadowListener = shadowListeners[i]).id) && blockList.indexOf(id) === -1) {
 					
 					i0 = i;
-					while (++i0 < shadowListenersLength && shadowListeners[i].id !== id);
+					while (++i0 < shadowListenersLength && shadowListeners[i0].id !== id);
 					i0 === shadowListenersLength && (filtered[++i1] = shadowListener);
 					
-				}
+				} else filtered[++i1] = shadowListener;
 				
 			}
 			

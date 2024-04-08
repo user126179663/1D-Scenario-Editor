@@ -82,15 +82,19 @@ export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 		
 	};
 	
-	static [HTMLAppCommonBaseElement.$tabCreator] = {
+	static [HTMLAppCommonBaseElement.$createTab](target, index, length, tabButton, callee, targets, option) {
 		
-		['#tabs'](target, index, length, tabButton, callee, targets) {
-			
-			return this.constructor.defaultScenariosTabOption;
-			
-		}
+		const scenariosNode = document.createElement('scenarios-node'),
+				scenarioNode = document.createElement('scenario-node'),
+				scenarioCtrl = document.createElement('scenario-controller');
 		
-	};
+		scenarioCtrl.add(null),
+		scenarioNode.add(scenarioCtrl),
+		scenariosNode.appendScenarioNodes(scenarioNode);
+		
+		return { ...this.constructor.defaultScenariosTabOption, target: scenariosNode };
+		
+	}
 	
 	static getDate(element) {
 		
@@ -152,15 +156,10 @@ export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 					interactedCreateNextEditionButton,
 					interactedSaveButton,
 					mutated,
-					onAppendTab,
-					onPrependTab,
 					saveButton,
 					saved,
-					scenariosNodeTabsContainer,
 					shadowRoot
 				} = this;
-		
-		customElements.upgrade(scenariosNodeTabsContainer),
 		
 		this.addListener(createNewEditionButton, 'click', interactedCreateNewEditionButton),
 		this.addListener(createNextEditionButton, 'click', interactedCreateNextEditionButton),
@@ -168,10 +167,7 @@ export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 		this.addListener(this, 'mutated', mutated),
 		this.addListener(this, 'saved', saved),
 		this.addListener(closeButton, 'click', interactedCloseButton),
-		this.addListener(saveButton, 'click', interactedSaveButton),
-		
-		this.addListener(scenariosNodeTabsContainer, 'append-tab', onAppendTab),
-		this.addListener(scenariosNodeTabsContainer, 'prepend-tab', onPrependTab);
+		this.addListener(saveButton, 'click', interactedSaveButton);
 		
 	}
 	
@@ -200,8 +196,7 @@ export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 					scenariosNodeTabViewsContainer
 				} = this;
 		
-		this.appendTabs
-			(scenariosNodeTabsContainer, scenariosNodeTabViewsContainer, defaultScenariosTabOption, ...arguments);
+		this.addTabs({ ...defaultScenariosTabOption, container: scenariosNodeTabsContainer, viewer: scenariosNodeTabViewsContainer }, ...arguments);
 		
 	}
 	prependScenariosNodes() {
@@ -212,8 +207,7 @@ export default class HTMLDocManagerElement extends HTMLAppCommonBaseElement {
 					scenariosNodeTabViewsContainer
 				} = this;
 		
-		this.prependTabs
-			(scenariosNodeTabsContainer, scenariosNodeTabViewsContainer, defaultScenariosTabOption, ...arguments);
+		this.addTabs({ ...defaultScenariosTabOption, container: scenariosNodeTabsContainer, prepends: true, viewer: scenariosNodeTabViewsContainer }, ...arguments);
 		
 	}
 	
